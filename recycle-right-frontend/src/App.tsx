@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Header from "./components/Header";
-import Button from "./components/Button";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
 import styled from 'styled-components';
 import LogRecycling from './pages/logRecycling';
+import { useState } from 'react';
 
 // Define the styled component
 const Container = styled.div`
@@ -15,16 +15,42 @@ const Container = styled.div`
   min-height: 100vh;
 `;
 
+
+const LRButton = styled.button`
+  background-color: #006647; 
+  color: white;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+  font-weight: 600; 
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: #25eb92;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+
 const App = () => {
+  const [totalPoints, setTotalPoints] = useState(0);
+
   return (
     <Router>
       <Container>
         <Header />
+        <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
+          Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Name
+        </div>
         <div className="p-4">
           <h1 className="text-2xl font-bold text-center mb-3">Trashtalker</h1>
-          <Link to="/log-recycling">
-            <Button text="➕ Log recycling" />
-          </Link>
+          <LRButton><span className="fa-solid fa-camera"></span>Log Recycling</LRButton>
           <Activity />
           <Navigation />
         </div>

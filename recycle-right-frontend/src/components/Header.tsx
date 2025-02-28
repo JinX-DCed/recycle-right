@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { useState } from 'react';
 
 const Navbar = styled.div`
   background-color: #00a108; 
@@ -21,13 +22,62 @@ const HamburgerButton = styled.button`
   }
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); // Semi-transparent background
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const DropdownMenu = styled.div`
+  background-color: white;
+  color: black;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  border-radius: 8px;
+  padding: 16px;
+  width: 300px;
+`;
+
+const DropdownItem = styled.div`
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
+
 const Header = () => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
+    };
+
     return (
       <Navbar>
         <div>Points and name</div>
-        <HamburgerButton>
-          &#9776; 
-        </HamburgerButton>
+        <div style={{ position: 'relative' }}>
+          <HamburgerButton onClick={toggleDropdown}>
+            &#9776; 
+          </HamburgerButton>
+          {isOpen && (
+            <ModalOverlay onClick={() => setIsOpen(false)}>
+              <DropdownMenu onClick={(e) => e.stopPropagation()}>
+                <DropdownItem>Option 1</DropdownItem>
+                <DropdownItem>Option 2</DropdownItem>
+                <DropdownItem>Option 3</DropdownItem>
+              </DropdownMenu>
+            </ModalOverlay>
+          )}
+        </div>
       </Navbar>
     );
 };
