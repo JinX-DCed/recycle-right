@@ -3,8 +3,9 @@ import Header from "./components/Header";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
 import styled from 'styled-components';
-import LogRecycling from './pages/logRecycling';
 import { useState } from 'react';
+import LogRecycling from './pages/logRecycling';
+import Modal from './components/Modal';
 
 // Define the styled component
 const Container = styled.div`
@@ -40,17 +41,44 @@ const LRButton = styled.button`
 
 const App = () => {
   const [totalPoints, setTotalPoints] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [recyclableDescription, setRecyclableDescription] = useState('');
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUploadedImage(imageUrl);
+      // Example logic to determine recyclability and points
+      const canRecycle = true; // Replace with actual logic
+      setRecyclableDescription(canRecycle ? 'This item can be recycled.' : 'This item cannot be recycled.');
+      setTotalPoints(prevPoints => prevPoints + (canRecycle ? 10 : 0));
+      setIsModalOpen(true);
+    }
+  };
 
   return (
     <Router>
       <Container>
         <Header />
         <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Name
+          Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Donovan
         </div>
         <div className="p-4">
           <h1 className="text-2xl font-bold text-center mb-3">Trashtalker</h1>
-          <LRButton><span className="fa-solid fa-camera"></span>Log Recycling</LRButton>
+          <LRButton>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+              style={{ display: 'none' }} 
+              id="image-upload" 
+            />
+            <label htmlFor="image-upload" style={{ color: 'white', textDecoration: 'none', width: '100%', display: 'block' }}>
+              <span className="fa-solid fa-camera"></span>Upload Image
+            </label>
+          </LRButton>
           <Activity />
           <Navigation />
         </div>
@@ -60,6 +88,16 @@ const App = () => {
         <Route path="/log-recycling" element={<LogRecycling />} />
         {/* Add other routes here if needed */}
       </Routes>
+
+      {/* Modal for displaying uploaded image and information */}
+      {isModalOpen && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <h2>Uploaded Image</h2>
+          {uploadedImage && <img src={uploadedImage} alt="Uploaded" style={{ maxWidth: '100%' }} />}
+          <p>{recyclableDescription}</p>
+          <p>You earned {totalPoints} points!</p>
+        </Modal>
+      )}
     </Router>
   );
 };
