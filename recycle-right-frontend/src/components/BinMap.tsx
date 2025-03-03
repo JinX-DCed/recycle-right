@@ -4,14 +4,16 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import styled from 'styled-components';
 
 // Use a valid Mapbox access token - replace with your own from mapbox.com
-mapboxgl.accessToken = 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25ibWM5In0.23w4XcxSUUyeK263dtTOtg';
+mapboxgl.accessToken = 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg';
 
 const MapContainer = styled.div`
+  max-width: 28rem; /* Match the App container width */
   width: 100%;
   height: 70vh;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 20px;
+  margin: 0 auto; /* Center the map */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 

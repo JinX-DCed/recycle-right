@@ -15,6 +15,15 @@ const PageContainer = styled.div`
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center content horizontally */
+`;
+
+const ContentWrapper = styled.div`
+  width: 100%;
+  max-width: 28rem; /* Match the App container width */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Header = styled.div`
@@ -24,6 +33,7 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 `;
 
 const BackButton = styled.button`
@@ -46,6 +56,7 @@ const Title = styled.h1`
 const MapContainer = styled.div`
   flex: 1;
   position: relative;
+  width: 100%;
 `;
 
 const BinMapPage: React.FC = () => {
@@ -73,18 +84,20 @@ const BinMapPage: React.FC = () => {
   
   return (
     <PageContainer>
-      <Header>
-        <BackButton onClick={handleBack}>
-          <FontAwesomeIcon icon={faArrowLeft} />
-        </BackButton>
-        <Title>Recycling Bins Map</Title>
-      </Header>
-      <MapContainer>
-        <BinMap 
-          onClose={handleBack} 
-          directedLocation={directedLocation}
-        />
-      </MapContainer>
+      <ContentWrapper>
+        <Header>
+          <BackButton onClick={handleBack}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </BackButton>
+          <Title>Recycling Bins Map</Title>
+        </Header>
+        <MapContainer>
+          <BinMap 
+            onClose={handleBack} 
+            directedLocation={directedLocation}
+          />
+        </MapContainer>
+      </ContentWrapper>
     </PageContainer>
   );
 };

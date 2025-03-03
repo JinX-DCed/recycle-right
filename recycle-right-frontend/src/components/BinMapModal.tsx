@@ -18,13 +18,14 @@ const ModalOverlay = styled.div`
 const ModalContent = styled.div`
   background-color: white;
   width: 90%;
-  max-width: 800px;
+  max-width: 28rem; /* Match the App container width */
   height: 80vh;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  margin: 0 auto; /* Center the modal */
 `;
 
 const ModalHeader = styled.div`
