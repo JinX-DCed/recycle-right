@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook, faMap, faChartBar } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import BinMapModal from './BinMapModal';
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -32,20 +34,33 @@ const NavButton = styled.button`
 `;
 
 const Navigation = () => {
-    return (
+  const [isBinMapOpen, setIsBinMapOpen] = useState(false);
+
+  const handleOpenBinMap = () => {
+    setIsBinMapOpen(true);
+  };
+
+  const handleCloseBinMap = () => {
+    setIsBinMapOpen(false);
+  };
+
+  return (
+    <>
       <NavigationContainer>
         <NavButton>
           <FontAwesomeIcon icon={faBook} /> Resources
         </NavButton>
-        <NavButton>
+        <NavButton onClick={handleOpenBinMap}>
           <FontAwesomeIcon icon={faMap} /> Bin map
         </NavButton>
         <NavButton>
           <FontAwesomeIcon icon={faChartBar} /> Statistics
         </NavButton>
       </NavigationContainer>
-    );
-  };
+
+      <BinMapModal isOpen={isBinMapOpen} onClose={handleCloseBinMap} />
+    </>
+  );
+};
   
-  export default Navigation;
-  
+export default Navigation;

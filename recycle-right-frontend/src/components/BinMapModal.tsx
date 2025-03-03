@@ -1,0 +1,63 @@
+import React from 'react';
+import styled from 'styled-components';
+import BinMap from './BinMap';
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  width: 90%;
+  max-width: 800px;
+  height: 80vh;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+`;
+
+const Title = styled.h2`
+  font-size: 1.5rem;
+  color: #006647;
+  margin: 0;
+`;
+
+interface BinMapModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const BinMapModal: React.FC<BinMapModalProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <ModalHeader>
+          <Title>Recycling Bins in Singapore</Title>
+        </ModalHeader>
+        <BinMap onClose={onClose} />
+      </ModalContent>
+    </ModalOverlay>
+  );
+};
+
+export default BinMapModal;
