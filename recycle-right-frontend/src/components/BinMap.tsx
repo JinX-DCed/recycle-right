@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import styled from 'styled-components';
 
 // Use a valid Mapbox access token - replace with your own from mapbox.com
-mapboxgl.accessToken = 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg';
+mapboxgl.accessToken = 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25ibWM5In0.23w4XcxSUUyeK263dtTOtg';
 
 const MapContainer = styled.div`
   width: 100%;
@@ -130,19 +130,21 @@ const binColors: Record<RecyclingBin['type'], string> = {
 
 interface BinMapProps {
   onClose: () => void;
+  directedLocation?: { lat: number; lng: number } | null;
 }
 
-const BinMap: React.FC<BinMapProps> = ({ onClose }) => {
+const BinMap: React.FC<BinMapProps> = ({ onClose, directedLocation }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLegend, setShowLegend] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
-  // Singapore center coordinates as LngLatLike
-  const center: LngLatLike = { lng: 103.8198, lat: 1.3521 };
-
+  // Default Singapore center coordinates
+  const defaultCenter: LngLatLike = { lng: 103.8198, lat: 1.3521 };
+  
   // Check if device is mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -162,6 +164,28 @@ const BinMap: React.FC<BinMapProps> = ({ onClose }) => {
   const toggleLegend = () => {
     setShowLegend(prev => !prev);
   };
+  
+  // Center the map on the directed location
+  useEffect(() => {
+    if (map.current && directedLocation) {
+      map.current.flyTo({
+        center: [directedLocation.lng, directedLocation.lat],
+        zoom: 16,
+        essential: true
+      });
+      
+      // Add a marker at the directed location
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+      
+      markerRef.current = new mapboxgl.Marker({ color: '#FF0000' })
+        .setLngLat([directedLocation.lng, directedLocation.lat])
+        .addTo(map.current)
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+          .setHTML('<h3>Directed Location</h3><p>This is the location you were directed to.</p>'));
+    }
+  }, [directedLocation, map.current]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -171,8 +195,8 @@ const BinMap: React.FC<BinMapProps> = ({ onClose }) => {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/streets-v11',
-        center: center,
-        zoom: 11,
+        center: directedLocation ? [directedLocation.lng, directedLocation.lat] : defaultCenter,
+        zoom: directedLocation ? 16 : 11,
         attributionControl: false, // Hide attribution for more map space on mobile
       });
 
@@ -199,197 +223,156 @@ const BinMap: React.FC<BinMapProps> = ({ onClose }) => {
       map.current.on('error', (e) => {
         console.error('Mapbox error:', e.error);
         setError(`Map error: ${e.error?.message || 'Unknown error'}`);
-        setLoading(false);
       });
 
-      // Wait for map to load
-      map.current.on('load', () => {
-        setLoading(false);
-        setError(null);
-        
-        // Enhanced recycling bin data with types, collection times, and accepted items
-        const bins: RecyclingBin[] = [
-          { 
-            lng: 103.8522, 
-            lat: 1.3031, 
-            name: "Tanjong Pagar Plaza Recycling Bin",
-            type: "comprehensive",
-            accepts: ["Paper", "Plastic", "Metal", "Glass", "Electronic waste"],
-            collectionTimes: "Daily, 7:00 AM - 10:00 PM"
-          },
-          { 
-            lng: 103.8300, 
-            lat: 1.3100, 
-            name: "Tiong Bahru Recycling Point",
-            type: "general",
-            accepts: ["Paper", "Plastic", "Metal"],
-            collectionTimes: "Mon-Sat, 8:00 AM - 8:00 PM"
-          },
-          { 
-            lng: 103.8400, 
-            lat: 1.3200, 
-            name: "Clarke Quay Recycling Station",
-            type: "general",
-            accepts: ["Paper", "Plastic", "Metal", "Glass"],
-            collectionTimes: "Daily, 9:00 AM - 9:00 PM"
-          },
-          { 
-            lng: 103.8484, 
-            lat: 1.3644, 
-            name: "Novena Square Recycling Bin",
-            type: "electronic",
-            accepts: ["Electronic waste", "Batteries"],
-            collectionTimes: "Mon-Fri, 10:00 AM - 7:00 PM"
-          },
-          { 
-            lng: 103.9428, 
-            lat: 1.3203, 
-            name: "Bedok Mall Recycling Point",
-            type: "comprehensive",
-            accepts: ["Paper", "Plastic", "Metal", "Glass", "Fabric", "Electronic waste"],
-            collectionTimes: "Daily, 10:00 AM - 10:00 PM"
-          },
-          { 
-            lng: 103.8318, 
-            lat: 1.4318, 
-            name: "Woodlands Plaza Recycling Station",
-            type: "general",
-            accepts: ["Paper", "Plastic", "Metal"],
-            collectionTimes: "Mon-Sun, 7:00 AM - 7:00 PM"
-          },
-          { 
-            lng: 103.7832, 
-            lat: 1.3052, 
-            name: "Holland Village Recycling Bin",
-            type: "paper",
-            accepts: ["Paper", "Cardboard"],
-            collectionTimes: "Mon, Wed, Fri, 9:00 AM - 6:00 PM"
-          },
-          { 
-            lng: 103.8559, 
-            lat: 1.2971, 
-            name: "Marina Bay Sands Recycling Point",
-            type: "comprehensive",
-            accepts: ["Paper", "Plastic", "Metal", "Glass", "Electronic waste"],
-            collectionTimes: "Daily, 24 hours"
-          },
-        ];
+      // Add marker for directed location if available
+      if (directedLocation) {
+        markerRef.current = new mapboxgl.Marker({ color: '#FF0000' })
+          .setLngLat([directedLocation.lng, directedLocation.lat])
+          .addTo(map.current)
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+            .setHTML('<h3>Directed Location</h3><p>This is the location you were directed to.</p>'));
+      }
 
-        // Add markers for each bin
+      // Sample bin data
+      const bins: RecyclingBin[] = [
+        {
+          lng: 103.8198,
+          lat: 1.3521,
+          name: "Central Singapore Bin",
+          type: "comprehensive",
+          accepts: ["Paper", "Plastic", "Glass", "Metal", "E-waste"],
+          collectionTimes: "Daily, 8am - 8pm"
+        },
+        {
+          lng: 103.7771,
+          lat: 1.2949,
+          name: "Buona Vista Bin",
+          type: "general",
+          accepts: ["Paper", "Plastic", "Metal"],
+          collectionTimes: "Mon-Fri, 9am - 6pm"
+        },
+        {
+          lng: 103.8559,
+          lat: 1.3438,
+          name: "Geylang E-waste Bin",
+          type: "electronic",
+          accepts: ["Batteries", "Small electronics", "Cables"],
+          collectionTimes: "24/7"
+        },
+        {
+          lng: 103.9455,
+          lat: 1.3509,
+          name: "Tampines Paper Recycling",
+          type: "paper",
+          accepts: ["Newspapers", "Magazines", "Cardboard"],
+          collectionTimes: "Mon-Sat, 10am - 7pm"
+        },
+        // Add more bins...
+      ];
+
+      // Add event for when map is loaded
+      map.current.on('load', () => {
+        setTimeout(() => setLoading(false), 500); // Short delay to ensure the map rendering completes
+        
+        // Add markers for bins
         bins.forEach(bin => {
-          // Create a marker with color based on bin type
+          // Create marker element
           const markerElement = document.createElement('div');
-          markerElement.className = 'marker';
-          markerElement.style.width = '30px'; // Larger for better touch target
-          markerElement.style.height = '30px'; // Larger for better touch target
+          markerElement.className = 'bin-marker';
+          markerElement.style.width = '24px';
+          markerElement.style.height = '24px';
           markerElement.style.borderRadius = '50%';
           markerElement.style.backgroundColor = binColors[bin.type];
-          markerElement.style.border = '3px solid white'; // More visible border
-          markerElement.style.boxShadow = '0 3px 6px rgba(0, 0, 0, 0.3)';
+          markerElement.style.border = '2px solid white';
+          markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
           markerElement.style.cursor = 'pointer';
-          
-          // Create formatted content for popup - optimized for mobile
+
+          // Create and add the marker
+          const marker = new mapboxgl.Marker(markerElement)
+            .setLngLat([bin.lng, bin.lat])
+            .addTo(map.current!);
+
+          // Create popup content
           const popupContent = `
-            <div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 280px; padding: 5px;">
-              <h3 style="margin-top: 0; margin-bottom: 10px; color: ${binColors[bin.type]}; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 18px;">${bin.name}</h3>
-              <p style="margin: 8px 0; font-size: 15px;"><strong>Type:</strong> ${bin.type.charAt(0).toUpperCase() + bin.type.slice(1)} Recycling</p>
-              <p style="margin: 8px 0; font-size: 15px;"><strong>Accepts:</strong></p>
-              <ul style="padding-left: 20px; margin: 8px 0; font-size: 15px;">
-                ${bin.accepts.map(item => `<li style="margin-bottom: 5px;">${item}</li>`).join('')}
-              </ul>
-              <p style="margin: 8px 0; font-size: 15px;"><strong>Collection Times:</strong><br>${bin.collectionTimes}</p>
-              <div style="margin-top: 10px; text-align: center;">
-                <a href="https://maps.google.com/?q=${bin.lat},${bin.lng}" target="_blank" style="display: inline-block; background-color: #4285F4; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; font-size: 14px; margin-top: 5px;">
-                  Get Directions
-                </a>
-              </div>
+            <div style="max-width: 220px;">
+              <h3 style="margin: 0 0 8px; font-size: 16px; color: #333;">${bin.name}</h3>
+              <p style="margin: 0 0 5px; font-size: 14px;"><strong>Type:</strong> ${bin.type.charAt(0).toUpperCase() + bin.type.slice(1)}</p>
+              <p style="margin: 0 0 5px; font-size: 14px;"><strong>Accepts:</strong> ${bin.accepts.join(', ')}</p>
+              <p style="margin: 0; font-size: 14px;"><strong>Collection:</strong> ${bin.collectionTimes}</p>
             </div>
           `;
 
-          // Configure popup with options better suited for mobile
-          const popup = new mapboxgl.Popup({
+          // Add popup
+          marker.setPopup(new mapboxgl.Popup({
             offset: 25,
             closeButton: true,
-            closeOnClick: false, // Don't close when map is clicked - better for mobile
-            maxWidth: '300px',
-            className: 'custom-popup' // For potential additional CSS styling
-          }).setHTML(popupContent);
-
-          // Add marker to map with proper LngLatLike format
-          new mapboxgl.Marker(markerElement)
-            .setLngLat({ lng: bin.lng, lat: bin.lat })
-            .setPopup(popup)
-            .addTo(map.current!);
+            maxWidth: '300px'
+          }).setHTML(popupContent));
         });
       });
+
+      // Cleanup
+      return () => {
+        if (map.current) {
+          map.current.remove();
+          map.current = null;
+        }
+      };
     } catch (err) {
-      console.error('Error initializing map:', err);
-      setError(`Failed to initialize map: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error("Error initializing map:", err);
+      setError(`Failed to initialize map: ${(err as Error).message}`);
       setLoading(false);
     }
-
-    // Clean up on unmount
-    return () => {
-      if (map.current) {
-        map.current.remove();
-        map.current = null;
-      }
-    };
   }, []);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{ position: 'relative', height: '100%' }}>
       <MapContainer ref={mapContainer} />
+      
       {loading && (
         <LoadingOverlay>
-          <p>Loading map...</p>
+          <div>Loading map...</div>
         </LoadingOverlay>
       )}
+      
       {error && (
-        <LoadingOverlay>
-          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', maxWidth: '80%', textAlign: 'center' }}>
-            <p style={{ color: 'red', fontWeight: 'bold' }}>Error loading map</p>
-            <p>{error}</p>
-            <p>Please make sure you have a valid Mapbox API key.</p>
-            <button 
-              onClick={onClose} 
-              style={{ 
-                backgroundColor: '#006647', 
-                color: 'white', 
-                padding: '12px 20px', /* Larger for better touch target */
-                border: 'none', 
-                borderRadius: '4px', 
-                cursor: 'pointer',
-                fontSize: '16px', /* Larger font for mobile */
-                marginTop: '10px'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </LoadingOverlay>
+        <div style={{ padding: '20px', color: 'red', textAlign: 'center' }}>
+          {error}
+        </div>
       )}
+      
+      <CloseButton onClick={onClose}>×</CloseButton>
+      
       {showLegend && (
         <LegendContainer>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: isMobile ? '16px' : '14px' }}>
-            Recycling Bin Types
-          </div>
-          {Object.entries(binColors).map(([type, color]) => (
-            <LegendItem key={type}>
-              <LegendColor color={color} />
-              <span style={{ fontSize: isMobile ? '15px' : '14px' }}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </span>
-            </LegendItem>
-          ))}
+          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Bin Types</div>
+          <LegendItem>
+            <LegendColor color={binColors.general} />
+            <div>General Recycling</div>
+          </LegendItem>
+          <LegendItem>
+            <LegendColor color={binColors.electronic} />
+            <div>E-waste</div>
+          </LegendItem>
+          <LegendItem>
+            <LegendColor color={binColors.paper} />
+            <div>Paper</div>
+          </LegendItem>
+          <LegendItem>
+            <LegendColor color={binColors.comprehensive} />
+            <div>Comprehensive</div>
+          </LegendItem>
+          <LegendItem>
+            <LegendColor color="#FF0000" />
+            <div>Directed Location</div>
+          </LegendItem>
         </LegendContainer>
       )}
-      {isMobile && (
-        <InfoButton onClick={toggleLegend}>
-          {showLegend ? '×' : 'i'}
-        </InfoButton>
+      
+      {isMobile && !showLegend && (
+        <InfoButton onClick={toggleLegend}>ⓘ</InfoButton>
       )}
-      <CloseButton onClick={onClose}>×</CloseButton>
     </div>
   );
 };

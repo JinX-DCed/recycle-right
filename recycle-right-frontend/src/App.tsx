@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "./components/Header";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import LogRecycling from './pages/logRecycling';
 import Modal from './components/Modal';
+import BinMapPage from './pages/BinMapPage';
 
 // Define the styled component
 const Container = styled.div`
@@ -15,7 +16,6 @@ const Container = styled.div`
   background-color: #f9fafb;
   min-height: 100vh;
 `;
-
 
 const LRButton = styled.button`
   background-color: #006647; 
@@ -38,7 +38,6 @@ const LRButton = styled.button`
   }
 `;
 
-
 const App = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,35 +57,39 @@ const App = () => {
     }
   };
 
+  // Component for the home page
+  const HomePage = () => (
+    <Container>
+      <Header />
+      <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
+        Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Donovan
+      </div>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold text-center mb-3">Trashtalker</h1>
+        <LRButton>
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleImageUpload} 
+            style={{ display: 'none' }} 
+            id="image-upload" 
+          />
+          <label htmlFor="image-upload" style={{ color: 'white', textDecoration: 'none', width: '100%', display: 'block' }}>
+            <span className="fa-solid fa-camera"></span>Upload Image
+          </label>
+        </LRButton>
+        <Activity />
+        <Navigation />
+      </div>
+    </Container>
+  );
+
   return (
     <Router>
-      <Container>
-        <Header />
-        <div style={{ textAlign: 'center', margin: '20px 0', fontSize: '24px', fontWeight: 'bold', color: '#333' }}>
-          Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Donovan
-        </div>
-        <div className="p-4">
-          <h1 className="text-2xl font-bold text-center mb-3">Trashtalker</h1>
-          <LRButton>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageUpload} 
-              style={{ display: 'none' }} 
-              id="image-upload" 
-            />
-            <label htmlFor="image-upload" style={{ color: 'white', textDecoration: 'none', width: '100%', display: 'block' }}>
-              <span className="fa-solid fa-camera"></span>Upload Image
-            </label>
-          </LRButton>
-          <Activity />
-          <Navigation />
-        </div>
-      </Container>
-
       <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/binmap" element={<BinMapPage />} />
         <Route path="/log-recycling" element={<LogRecycling />} />
-        {/* Add other routes here if needed */}
       </Routes>
 
       {/* Modal for displaying uploaded image and information */}
