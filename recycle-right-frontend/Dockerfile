@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install dependencies and serve (for hosting the built app)
 RUN npm ci && npm install -g serve
 
+# Environment variable for the backend API (can be overridden at runtime)
+ENV REACT_APP_API_URL=http://localhost:3000
+
 # Copy the rest of the application code
 COPY . .
 
@@ -19,8 +22,6 @@ RUN npm run build
 # Expose port 8080
 EXPOSE 8080
 
-# Environment variable for the backend API (can be overridden at runtime)
-ENV REACT_APP_API_URL=http://localhost:8080
-
 # Command to serve the built application
 CMD ["serve", "-s", "build", "-l", "8080"]
+
