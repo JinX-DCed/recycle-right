@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import Header from "./components/Header";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
@@ -7,8 +7,9 @@ import { useState } from 'react';
 import LogRecycling from './pages/logRecycling';
 import Modal from './components/Modal';
 import BinMapPage from './pages/BinMapPage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComment, faPlus } from '@fortawesome/free-solid-svg-icons';  // Chat bubble icon
 
-// Define the styled component
 const Container = styled.div`
   max-width: 28rem; 
   margin: 0 auto;
@@ -25,7 +26,30 @@ const LRButton = styled.button`
   border-radius: 8px; 
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   font-size: 18px;
+  margin-bottom: 20px;
   font-weight: 600; 
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: #25eb92;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const TTButton = styled.button`
+  background-color: #006647; 
+  color: white;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+  font-weight: 600; 
+  margin-bottom: 10px;
   transition: background-color 0.3s, transform 0.2s;
 
   &:hover {
@@ -56,7 +80,6 @@ const App = () => {
 		}
 	};
 
-	// Component for the home page
 	const HomePage = () => {
 		const navigate = useNavigate();
 
@@ -72,7 +95,9 @@ const App = () => {
 					Total Points: <span style={{ color: '#006647' }}>{totalPoints}</span> | Donovan
 				</div>
 				<div className="p-4">
-					<h1 className="text-2xl font-bold text-center mb-3">Trashtalker</h1>
+					<TTButton>
+						<FontAwesomeIcon icon={faComment} className="text-gray-700" /> Trashtalker
+					</TTButton>
 					{/* <Link to="/logRecycling"> */}
 					<LRButton>
 						<input
@@ -83,7 +108,7 @@ const App = () => {
 							id="image-upload"
 						/>
 						<label htmlFor="image-upload" style={{ color: 'white', textDecoration: 'none', width: '100%', display: 'block' }}>
-							<span className="fa-solid fa-camera"></span>Upload Image
+							<FontAwesomeIcon icon={faPlus} className="text-gray-700" /> Log Recycling
 						</label>
 					</LRButton>
 					{/* </Link> */}
