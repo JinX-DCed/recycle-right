@@ -9,7 +9,7 @@ import {
   getNearestBinFunctionDeclaration,
 } from "./findNearestBin";
 
-const API_KEY = "API KEY HERE";
+const API_KEY = process.env.GEMINI_API_KEY;
 
 // For use in Function calling by Gemini
 // Refer to here: https://ai.google.dev/gemini-api/docs/function-calling/tutorial?lang=node
