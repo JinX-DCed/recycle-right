@@ -16,11 +16,11 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Expose port 3000 (default for serve)
-EXPOSE 3000
+# Expose port 8080
+EXPOSE 8080
 
 # Environment variable for the backend API (can be overridden at runtime)
 ENV REACT_APP_API_URL=http://localhost:8080
 
 # Command to serve the built application
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "8080"]
