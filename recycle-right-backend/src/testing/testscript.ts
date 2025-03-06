@@ -7,7 +7,7 @@ import { callGemini, ChatMsg } from "../gemini";
  */
 
 // EDIT THE IMG PATH FOR YOUR USE
-const testImgPath = "src/test_img.jpeg";
+const testImgPath = "src/test_img_2.jpeg";
 const testPrompt =
   "There are a few items in this picture. Can you tell me which of these can be recycled, and how to recycle it? I am in Singapore.";
 
@@ -40,13 +40,34 @@ const bluebinPrompt = `Can you find the nearest recycling bin or station? My cur
 //     mimeType: "image/jpeg",
 //   },
 // ];
-const msgs: ChatMsg[] = [
-  {
-    role: "user",
-    type: "text",
-    content: bluebinPrompt,
-  },
-];
+// const msgs: ChatMsg[] = [
+//   {
+//     role: "user",
+//     type: "text",
+//     content: bluebinPrompt,
+//   },
+// ];
+
+const example = {
+  name: "Empty bottle",
+  canBeRecycled: true,
+};
+
+const prompt: ChatMsg = {
+  type: "text",
+  role: "user",
+  content:
+    "The following is a base64 encoded image of one item. Return in JSON format two pieces of information. 1) The name of this item. 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
+    JSON.stringify(example),
+};
+
+const msgs: ChatMsg[] = [prompt];
+msgs.push({
+  type: "image",
+  role: "user",
+  content: testImg,
+  mimeType: "image/jpeg",
+});
 
 callGemini(msgs).then((res) => {
   console.log(res);
