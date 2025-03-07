@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook, faMap, faChartBar } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import BinMapModal from './BinMapModal';
+import ResourcesModal from './ResourcesModal';
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -35,6 +36,7 @@ const NavButton = styled.button`
 
 const Navigation = () => {
   const [isBinMapOpen, setIsBinMapOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
 
   const handleOpenBinMap = () => {
     setIsBinMapOpen(true);
@@ -44,10 +46,18 @@ const Navigation = () => {
     setIsBinMapOpen(false);
   };
 
+  const handleOpenResources = () => {
+    setIsResourcesOpen(true);
+  };
+
+  const handleCloseResources = () => {
+    setIsResourcesOpen(false);
+  };
+
   return (
     <>
       <NavigationContainer>
-        <NavButton>
+        <NavButton onClick={handleOpenResources}>
           <FontAwesomeIcon icon={faBook} /> Resources
         </NavButton>
         <NavButton onClick={handleOpenBinMap}>
@@ -59,6 +69,7 @@ const Navigation = () => {
       </NavigationContainer>
 
       <BinMapModal isOpen={isBinMapOpen} onClose={handleCloseBinMap} />
+      <ResourcesModal isOpen={isResourcesOpen} onClose={handleCloseResources} />
     </>
   );
 };
