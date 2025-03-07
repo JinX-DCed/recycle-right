@@ -4,7 +4,11 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import styled from 'styled-components';
 
 // Use environment variable for Mapbox access token
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
+const mapboxToken = process.env.REACT_APP_MAPBOX_TOKEN;
+if (!mapboxToken) {
+  console.error('Mapbox token is not defined in environment variables. Map functionality will not work.');
+}
+mapboxgl.accessToken = mapboxToken || 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg'; // Fallback to hardcoded token as a safety measure
 
 const MapContainer = styled.div`
   max-width: 28rem; /* Match the App container width */
@@ -191,6 +195,12 @@ const BinMap: React.FC<BinMapProps> = ({ onClose, directedLocation }) => {
 
   useEffect(() => {
     if (!mapContainer.current) return;
+    
+    if (!mapboxgl.accessToken) {
+      setError('Mapbox token is missing. Please check your environment configuration.');
+      setLoading(false);
+      return;
+    }
 
     try {
       // Initialize map
