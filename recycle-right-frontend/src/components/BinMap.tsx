@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import styled from 'styled-components';
 
 // Use environment variable for Mapbox access token
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || 'pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg';
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
 const MapContainer = styled.div`
   max-width: 28rem; /* Match the App container width */
