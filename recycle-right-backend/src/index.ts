@@ -5,17 +5,27 @@ import { getNearestBinCoordinates } from "./findNearestBin";
 const app = express();
 const port = 8080;
 
+app.use(express.json());
+
+app.get("/health", (req, res) => {
+  console.log("ALIVE");
+
+  res.send("ALIVE");
+});
+
 app.post("/gemini", async (req, res) => {
   // messages is of type ChatMsgs
   const { messages } = req.body;
+  console.log("Received chat messages");
 
   const result = await callGemini(messages);
 
   res.send(result);
 });
 
-app.post("/image/recognize", async (req, res) => {
+app.post("/image/recognise", async (req, res) => {
   const { image } = req.body;
+  console.log("received image: ", (image as string).slice(0, 10));
 
   const example = {
     name: "Empty bottle",
@@ -26,7 +36,7 @@ app.post("/image/recognize", async (req, res) => {
     type: "text",
     role: "user",
     content:
-      "The following is a base64 encoded image of one item. Return in JSON format two pieces of information. 1) The name of this item. 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
+      "The following is a base64 encoded image of one item. Return in JSON format two pieces of information. 1) The generic name of this item. 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
       JSON.stringify(example),
   };
 
@@ -38,8 +48,10 @@ app.post("/image/recognize", async (req, res) => {
     mimeType: "image/jpeg",
   });
 
+  console.log("Sending to gemini");
   const result = await callGemini(messages);
 
+  console.log("Result is ", result);
   res.send(result);
 });
 
