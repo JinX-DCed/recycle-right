@@ -3,7 +3,21 @@ import { callGemini, ChatMsg } from "./gemini";
 import { getNearestBinCoordinates } from "./findNearestBin";
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
+
+// Middleware to parse JSON requests
+app.use(express.json({ limit: '50mb' }));
+
+// Enable CORS for frontend requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.post("/gemini", async (req, res) => {
   // messages is of type ChatMsgs

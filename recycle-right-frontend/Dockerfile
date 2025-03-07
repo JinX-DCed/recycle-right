@@ -10,10 +10,15 @@ COPY package*.json ./
 # Install dependencies and serve (for hosting the built app)
 RUN npm ci && npm install -g serve
 
-# Environment variables for API URLs and tokens (can be overridden at runtime)
+# Environment variables for API URLs (can be overridden at runtime)
 # This will be overridden during deployment with the appropriate backend URL
-ENV REACT_APP_API_URL=http://recycle-right-backend:3000
-ENV REACT_APP_MAPBOX_TOKEN=pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg
+ENV REACT_APP_API_URL=http://localhost:8080
+# Mapbox token should be provided at runtime via environment variables
+# Do not hardcode sensitive tokens in the Dockerfile
+ENV REACT_APP_MAPBOX_TOKEN=''
+
+# Copy .env.default file specifically to ensure it's available in the container
+COPY .env.default /app/.env.default
 
 # Copy the rest of the application code
 COPY . .
@@ -21,9 +26,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Expose port 8080
-EXPOSE 8080
+# Expose port 3000
+EXPOSE 3000
 
 # Command to serve the built application
-CMD ["serve", "-s", "build", "-l", "8080"]
+CMD ["serve", "-s", "build", "-l", "3000", "--cors"]
 

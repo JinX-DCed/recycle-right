@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./recycle-right-frontend
+    ports:
+      - "8080:3000"
+    environment:
+      # Use the internal Docker service name for communication
+      - REACT_APP_API_URL=http://backend:8080
+    depends_on:
+      - backend
+    networks:
+      - recycle-network
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./recycle-right-backend
+    # Only expose port internally within the Docker network
+    expose:
+      - "8080"
+    environment:
+      - PORT=8080
+    volumes:
+      - ./recycle-right-backend/.env:/app/.env:ro
+    networks:
+      - recycle-network
+    restart: unless-stopped
+
+networks:
+  recycle-network:
+    driver: bridge
