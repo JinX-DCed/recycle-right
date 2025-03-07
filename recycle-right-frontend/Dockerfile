@@ -12,7 +12,7 @@ RUN npm ci && npm install -g serve
 
 # Environment variables for API URLs and tokens (can be overridden at runtime)
 # This will be overridden during deployment with the appropriate backend URL
-ENV REACT_APP_API_URL=http://recycle-right-backend:3000
+ENV REACT_APP_API_URL=http://recycle-right-backend:3001
 ENV REACT_APP_MAPBOX_TOKEN=pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg
 
 # Copy the rest of the application code

@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  recycle-right-backend:
+    build: 
+      context: ./recycle-right-backend
+    container_name: recycle-right-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Uses the GEMINI_API_KEY from host environment or .env file
+    restart: unless-stopped
+
+  recycle-right-frontend:
+    build:
+      context: ./recycle-right-frontend
+    container_name: recycle-right-frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - recycle-right-backend
+    environment:
+      - REACT_APP_API_URL=http://recycle-right-backend:3001
+      # The Mapbox token is already in the Dockerfile but can be overridden here
+    restart: unless-stopped
