@@ -5,7 +5,7 @@ import { getNearestBinCoordinates } from "./findNearestBin";
 const app = express();
 const port = 8080;
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
 app.get("/health", (req, res) => {
   console.log("ALIVE");
@@ -19,8 +19,11 @@ app.post("/gemini", async (req, res) => {
   console.log("Received chat messages");
 
   const result = await callGemini(messages);
+  console.log(result);
 
-  res.send(result);
+  res.send({
+    nextMsg: result,
+  });
 });
 
 app.post("/image/recognise", async (req, res) => {
