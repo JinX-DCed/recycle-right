@@ -1,9 +1,8 @@
-import styled from 'styled-components';
-import { useState } from 'react';
-import ChatModal from './ChatModal';
+import styled from "styled-components";
+import { useState } from "react";
 
 const Navbar = styled.div`
-  background-color: #00a108; 
+  background-color: #00a108;
   color: white;
   padding: 16px;
   display: flex;
@@ -56,45 +55,31 @@ const DropdownItem = styled.div`
 `;
 
 const Header = () => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-	const toggleDropdown = () => {
-		setIsOpen(!isOpen);
-	};
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
-	const handleOpenChat = () => {
-		setIsOpen(false); // Close dropdown
-		setIsChatOpen(true); // Open chat modal
-	};
-
-	const handleCloseChat = () => {
-		setIsChatOpen(false);
-	};
-
-	return (
-		<>
-			<Navbar>
-				<div>Recycle Right</div>
-				<div style={{ position: 'relative' }}>
-					<HamburgerButton onClick={toggleDropdown}>
-						&#9776;
-					</HamburgerButton>
-					{isOpen && (
-						<ModalOverlay onClick={() => setIsOpen(false)}>
-							<DropdownMenu onClick={(e) => e.stopPropagation()}>
-								<DropdownItem onClick={handleOpenChat}>Chat with assistant</DropdownItem>
-								<DropdownItem>Option 1</DropdownItem>
-								<DropdownItem>Option 2</DropdownItem>
-								<DropdownItem>Option 3</DropdownItem>
-							</DropdownMenu>
-						</ModalOverlay>
-					)}
-				</div>
-			</Navbar>
-			<ChatModal isOpen={isChatOpen} onClose={handleCloseChat} />
-		</>
-	);
+  return (
+    <>
+      <Navbar>
+        <div>Recycle Right</div>
+        <div style={{ position: "relative" }}>
+          <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton>
+          {isOpen && (
+            <ModalOverlay onClick={() => setIsOpen(false)}>
+              <DropdownMenu onClick={(e) => e.stopPropagation()}>
+                <DropdownItem>Option 1</DropdownItem>
+                <DropdownItem>Option 2</DropdownItem>
+                <DropdownItem>Option 3</DropdownItem>
+              </DropdownMenu>
+            </ModalOverlay>
+          )}
+        </div>
+      </Navbar>
+    </>
+  );
 };
 
 export default Header;
