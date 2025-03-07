@@ -1,9 +1,19 @@
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+// Configure dotenv to load environment variables
+dotenv.config();
+
 import express from "express";
-import { callGemini, ChatMsg } from "./gemini";
+import { callGemini, recognizeImage, ChatMsg } from "./gemini";
 import { getNearestBinCoordinates } from "./findNearestBin";
+// Add cors for cross-origin requests
+import cors from "cors";
 
 const app = express();
-const port = 8080;
+const port = 3001;
+
+// Enable CORS for all routes
+app.use(cors());
 
 app.use(express.json({ limit: "50mb" }));
 
@@ -28,34 +38,29 @@ app.post("/gemini", async (req, res) => {
 
 app.post("/image/recognise", async (req, res) => {
   const { image } = req.body;
-  console.log("received image: ", (image as string).slice(0, 10));
-
-  const example = {
-    name: "Empty bottle",
-    canBeRecycled: true,
-  };
-
-  const prompt: ChatMsg = {
-    type: "text",
-    role: "user",
-    content:
-      "The following is a base64 encoded image of one item. Return in JSON format two pieces of information. 1) The generic name of this item. 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
-      JSON.stringify(example),
-  };
-
-  const messages: ChatMsg[] = [prompt];
-  messages.push({
-    type: "image",
-    role: "user",
-    content: image,
-    mimeType: "image/jpeg",
-  });
-
-  console.log("Sending to gemini");
-  const result = await callGemini(messages);
-
-  console.log("Result is ", result);
-  res.send(result);
+  
+  if (!image) {
+    res.status(400).json({
+      error: "No image provided"
+    });
+    return;
+  }
+  
+  console.log("Received image for recognition: ", (image as string).slice(0, 10));
+  
+  try {
+    // Use the dedicated image recognition function
+    const result = await recognizeImage(image);
+    console.log("Image recognition result received");
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Error in image recognition endpoint:', error);
+    res.status(500).json({
+      error: 'Failed to process image recognition request',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
 });
 
 // app.post("/bin/nearest", (req, res) => {
