@@ -32,8 +32,11 @@ const model = genAI.getGenerativeModel({
   // This is the instruction that can be used to constrain and give more context to the model
   systemInstruction:
     "You will be talking about recycling in Singapore." +
+    " If you are asked to identify items, there might be multiple items in the image, try to identify them all." +
     " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
-    " Besides the nearest bin, a few alternatives should also be included in the response",
+    " Besides the nearest bin, a few alternatives should also be included in the response." +
+    " If formatting of the response is required, use HTML formatting instead of Markdown." +
+    " Make the responses easy to read, with short sentences and paragraphs, and listing in points if possible.",
 });
 
 export type ChatMsg = {
