@@ -8,7 +8,7 @@ import Header from "./components/Header";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
 import styled from "styled-components";
-import { useState } from "react";
+import { useState, createContext } from "react";
 import LogRecycling from "./pages/logRecycling";
 import Modal from "./components/Modal";
 import BinMapPage from "./pages/BinMapPage";
@@ -81,6 +81,26 @@ const api = axios.create({
   }
 });
 
+// Define the interface for the recognized item data
+interface RecognizedItemData {
+  name: string;
+  canBeRecycled: boolean;
+  description: string;
+  imageUrl: string | null;
+}
+
+// Define interface for the context
+interface RecycleRightContextType {
+  recognizedItem: RecognizedItemData | null;
+  updateTotalPoints: (points: number) => void;
+}
+
+// Create a context for sharing recognized item data and functions across components
+export const RecycleRightContext = createContext<RecycleRightContextType>({
+  recognizedItem: null,
+  updateTotalPoints: () => {}
+});
+
 const App = () => {
   const [totalPoints, setTotalPoints] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,6 +108,7 @@ const App = () => {
   const [recyclableDescription, setRecyclableDescription] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [recognizedItem, setRecognizedItem] = useState<RecognizedItemData | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,104 +127,122 @@ const App = () => {
     setIsModalOpen(true);
     setRecyclableDescription("Analyzing your image...");
     
-    // Read file as base64
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      let base64String = reader.result as string;
-      
-      // Extract the base64 part (remove data:image/jpeg;base64, prefix)
-      if (base64String.includes(',')) {
-        base64String = base64String.split(',')[1];
-      }
-      
-      try {
-        // Call the image recognition API
-        console.log("Sending image to: /image/recognise (size: " + base64String.length + " chars)");
+    // Return a promise that resolves when the image processing is complete
+    return new Promise<boolean>((resolve) => {
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        let base64String = reader.result as string;
         
-        let recognitionResponse;
+        // Extract the base64 part (remove data:image/jpeg;base64, prefix)
+        if (base64String.includes(',')) {
+          base64String = base64String.split(',')[1];
+        }
+        
         try {
-          // First attempt with API instance
-          recognitionResponse = await api.post("/image/recognise", {
-            image: base64String
-          });
-        } catch (instanceError: any) {
-          console.warn("Error with API instance for image, trying direct axios call...", instanceError.message);
+          // Call the image recognition API
+          console.log("Sending image to: /image/recognise (size: " + base64String.length + " chars)");
           
-          // Fallback to direct axios call
-          recognitionResponse = await axios({
-            method: 'post',
-            url: `${API_BASE_URL}/image/recognise`,
-            data: { image: base64String },
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 30000
-          });
-        }
-        
-        // Get the recognition result
-        const recognitionResult = recognitionResponse.data;
-        console.log("Recognition response:", recognitionResponse);
-        console.log("Recognition result:", recognitionResult);
-        
-        // Process the response
-        let canRecycle = false;
-        let itemName = "";
-        let description = "";
-        
-        if (recognitionResult && !recognitionResult.error) {
-          // Check if we have name and recyclability info
-          if (recognitionResult.name) {
-            itemName = recognitionResult.name;
-            canRecycle = recognitionResult.canBeRecycled === true;
+          let recognitionResponse;
+          try {
+            // First attempt with API instance
+            recognitionResponse = await api.post("/image/recognise", {
+              image: base64String
+            });
+          } catch (instanceError: any) {
+            console.warn("Error with API instance for image, trying direct axios call...", instanceError.message);
             
-            description = `Identified as: ${itemName}. `;
-            description += canRecycle ? 
-              "This item can be recycled in Singapore." : 
-              "This item cannot be recycled in Singapore.";
-          } else {
-            // Use raw response if we couldn't parse it properly
-            description = `Image analysis completed, but couldn't determine recyclability.`;
+            // Fallback to direct axios call
+            recognitionResponse = await axios({
+              method: 'post',
+              url: `${API_BASE_URL}/image/recognise`,
+              data: { image: base64String },
+              headers: { 'Content-Type': 'application/json' },
+              timeout: 30000
+            });
           }
-        } else {
-          // Handle error case
-          description = recognitionResult?.error || "Sorry, I couldn't analyze this image properly.";
+          
+          // Get the recognition result
+          const recognitionResult = recognitionResponse.data;
+          console.log("Recognition response:", recognitionResponse);
+          console.log("Recognition result:", recognitionResult);
+          
+          // Process the response
+          let canRecycle = false;
+          let itemName = "";
+          let description = "";
+          
+          if (recognitionResult && !recognitionResult.error) {
+            // Check if we have name and recyclability info
+            if (recognitionResult.name) {
+              itemName = recognitionResult.name;
+              canRecycle = recognitionResult.canBeRecycled === true;
+              
+              description = `Identified as: ${itemName}. `;
+              description += canRecycle ? 
+                "This item can be recycled in Singapore." : 
+                "This item cannot be recycled in Singapore.";
+            } else {
+              // Use raw response if we couldn't parse it properly
+              description = `Image analysis completed, but couldn't determine recyclability.`;
+            }
+          } else {
+            // Handle error case
+            description = recognitionResult?.error || "Sorry, I couldn't analyze this image properly.";
+          }
+          console.log("Description", description);
+          setRecyclableDescription(description);
+          
+          // Store the recognized item data for passing to LogRecycling
+          setRecognizedItem({
+            name: itemName,
+            canBeRecycled: canRecycle,
+            description: description,
+            imageUrl: imageUrl
+          });
+          
+          // Award points if the item is recyclable
+          if (canRecycle) {
+            setTotalPoints((prevPoints) => prevPoints + 10);
+          }
+          resolve(true);
+          
+        } catch (error: any) {
+          console.error("Error processing image:", error);
+          // More detailed error logging
+          if (error.response) {
+            console.error("Response error:", error.response.status, error.response.data);
+          } else if (error.request) {
+            console.error("Request error - no response received");
+          } else {
+            console.error("Request setup error:", error.message || 'Unknown error');
+          }
+          
+          setRecyclableDescription("Sorry, I had trouble processing your image. Please try again later.");
+          resolve(false);
+        } finally {
+          setIsLoading(false);
         }
-        console.log("Description", description);
-        setRecyclableDescription(description);
-        
-        // Award points if the item is recyclable
-        if (canRecycle) {
-          setTotalPoints((prevPoints) => prevPoints + 10);
-        }
-        
-      } catch (error: any) {
-        console.error("Error processing image:", error);
-        // More detailed error logging
-        if (error.response) {
-          console.error("Response error:", error.response.status, error.response.data);
-        } else if (error.request) {
-          console.error("Request error - no response received");
-        } else {
-          console.error("Request setup error:", error.message || 'Unknown error');
-        }
-        
-        setRecyclableDescription("Sorry, I had trouble processing your image. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    reader.readAsDataURL(file);
+      };
+      
+      reader.readAsDataURL(file);
+    });
   };
 
   const HomePage = () => {
     const navigate = useNavigate();
 
-    const handleImageUploadWithNavigation = (
+    const handleImageUploadWithNavigation = async (
       e: React.ChangeEvent<HTMLInputElement>
     ) => {
-      handleImageUpload(e);
-      navigate("/logRecycling");
-      setIsModalOpen(false);
+      // Wait for image processing to complete before navigating
+      const result = await handleImageUpload(e);
+      
+      // Display the modal with results for 2 seconds before navigating
+      setTimeout(() => {
+        navigate("/logRecycling");
+        setIsModalOpen(false);
+      }, 2000);
     };
     return (
       <Container>
@@ -257,13 +296,25 @@ const App = () => {
     );
   };
 
+  // Function to update the total points
+  const updateTotalPoints = (points: number) => {
+    setTotalPoints(prevPoints => prevPoints + points);
+  };
+
+  // Context value
+  const contextValue = {
+    recognizedItem,
+    updateTotalPoints
+  };
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/binmap" element={<BinMapPage />} />
-        <Route path="/logRecycling" element={<LogRecycling />} />
-      </Routes>
+    <RecycleRightContext.Provider value={contextValue}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/binmap" element={<BinMapPage />} />
+          <Route path="/logRecycling" element={<LogRecycling />} />
+        </Routes>
 
       {/* Modal for displaying uploaded image and information */}
       {isModalOpen && (
@@ -285,6 +336,7 @@ const App = () => {
         </Modal>
       )}
     </Router>
+    </RecycleRightContext.Provider>
   );
 };
 
