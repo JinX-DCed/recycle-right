@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComment, faPlus } from "@fortawesome/free-solid-svg-icons"; // Chat bubble icon
 import ChatModal from "./components/ChatModal";
 import axios from "axios";
+import SubmitLogs from "./pages/SubmitLogs";
 
 const Container = styled.div`
   max-width: 28rem;
@@ -314,6 +315,7 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/binmap" element={<BinMapPage />} />
           <Route path="/logRecycling" element={<LogRecycling />} />
+          <Route path="/submitLogs" element={<SubmitLogs />} />
         </Routes>
 
       {/* Modal for displaying uploaded image and information */}

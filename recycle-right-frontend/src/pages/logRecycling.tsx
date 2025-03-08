@@ -74,6 +74,13 @@ const LogRecycling = () => {
 	// Get the context data
 	const { recognizedItem, updateTotalPoints } = useContext(RecycleRightContext);
 	
+	// Check if items length is 0 and navigate to home page
+	// useEffect(() => {
+	// 	if (items.length === 0) {
+	// 		navigate('/'); // Navigate to the home page
+	// 	}
+	// }, [setItems, navigate]); // Dependency array includes items and navigate
+
 	// Handle image upload for retaking photos
 	const handleRetakePhoto = () => {
 		if (fileInputRef.current) {
@@ -84,7 +91,11 @@ const LogRecycling = () => {
 	// Handle deleting an item
 	const handleDeleteItem = (id: number) => {
 		setItems(prevItems => prevItems.filter(item => item.id !== id));
-		setItemPoints(0); // Reset points when deleting an item
+		setItemPoints(0);
+		console.log(items.length);
+		if (items.length === 0) {
+			navigate('/');
+		}
 	};
 
 	// Handle submitting the log
@@ -96,7 +107,7 @@ const LogRecycling = () => {
 		alert(`Success! Added ${itemPoints} points to your total.`);
 		
 		// Navigate back to the home page
-		navigate('/');
+		navigate('/submitLogs');
 	};
 	
 	// Update items when recognized item changes
@@ -135,7 +146,7 @@ const LogRecycling = () => {
 		}
 	}, [recognizedItem]);
 	
-	const canSubmit = itemPoints > 0;
+	const canSubmit = items.length !== 0;
 
 	return (
 		<Container>
