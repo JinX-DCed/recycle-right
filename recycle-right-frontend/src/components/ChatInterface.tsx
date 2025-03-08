@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import 'highlight.js/styles/github.css';
+import "highlight.js/styles/github.css";
 import axios from "axios";
 
 // Types as specified in the requirements
@@ -64,7 +64,7 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
   background-color: ${(props) => (props.isUser ? "#dcf8c6" : "#f0f0f0")};
   align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
   word-break: break-word;
-  
+
   /* Markdown styling */
   & pre {
     background-color: #f1f1f1;
@@ -72,42 +72,43 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
     padding: 12px;
     overflow-x: auto;
   }
-  
+
   & code {
     background-color: rgba(0, 0, 0, 0.05);
     padding: 2px 4px;
     border-radius: 4px;
     font-family: monospace;
   }
-  
+
   & table {
     border-collapse: collapse;
     margin: 10px 0;
     width: 100%;
   }
-  
-  & th, & td {
+
+  & th,
+  & td {
     border: 1px solid #ddd;
     padding: 8px;
   }
-  
+
   & th {
     background-color: #f2f2f2;
     text-align: left;
   }
-  
+
   & blockquote {
     margin: 0;
     padding-left: 10px;
     border-left: 3px solid #ccc;
     color: #666;
   }
-  
+
   & img {
     max-width: 100%;
     height: auto;
   }
-  
+
   & a {
     color: #00a108;
     text-decoration: none;
@@ -115,8 +116,9 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
       text-decoration: underline;
     }
   }
-  
-  & ul, & ol {
+
+  & ul,
+  & ol {
     margin: 10px 0;
     padding-left: 20px;
   }
@@ -219,7 +221,7 @@ const ImageButton = styled.button`
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  
+
   &:disabled {
     color: #cccccc;
     cursor: not-allowed;
@@ -231,7 +233,13 @@ const FileInput = styled.input`
 `;
 
 // Sample initial message
-const initialMessages: ChatMsges = [];
+const initialMessages: ChatMsges = [
+  {
+    type: "text",
+    role: "user",
+    content: "Hey, what can I help you with today?",
+  },
+];
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -250,46 +258,46 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
-    "Accept": "application/json"
+    Accept: "application/json",
   },
   timeout: 30000, // 30 seconds timeout (increased for debugging)
-  withCredentials: false // explicitly disable sending cookies
+  withCredentials: false, // explicitly disable sending cookies
 });
 
 // Add request interceptor for debugging
-api.interceptors.request.use(request => {
-  console.log('Full Request Config:', {
+api.interceptors.request.use((request) => {
+  console.log("Full Request Config:", {
     url: request.url,
     method: request.method,
     baseURL: request.baseURL,
     headers: request.headers,
-    data: request.data
+    data: request.data,
   });
   return request;
 });
 
 // Add response interceptor for debugging
 api.interceptors.response.use(
-  response => {
-    console.log('Response received successfully:', {
+  (response) => {
+    console.log("Response received successfully:", {
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
-      data: response.data
+      data: response.data,
     });
     return response;
   },
   (error: any) => {
-    console.error('API error details:', error.message);
+    console.error("API error details:", error.message);
     if (error.response) {
-      console.error('Error response:', {
+      console.error("Error response:", {
         status: error.response.status,
         statusText: error.response.statusText,
         headers: error.response.headers,
-        data: error.response.data
+        data: error.response.data,
       });
     } else if (error.request) {
-      console.error('Error request (no response):', error.request);
+      console.error("Error request (no response):", error.request);
     }
     return Promise.reject(error);
   }
@@ -377,42 +385,47 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
           type: userMessage.type,
           role: userMessage.role,
           content: userMessage.content,
-          mimeType: userMessage.mimeType
-        }
+          mimeType: userMessage.mimeType,
+        },
       ];
-      
+
       // Log the message being sent
-      console.log('Sending single message to backend:', {
+      console.log("Sending single message to backend:", {
         type: userMessage.type,
         role: userMessage.role,
-        contentLength: userMessage.content.length
+        contentLength: userMessage.content.length,
       });
-      
+
       // Call the backend API with only the latest message
-      console.log("Sending request to: /gemini with the latest user message only");
-      
+      console.log(
+        "Sending request to: /gemini with the latest user message only"
+      );
+
       let response;
       try {
         // First attempt using our configured API instance
         // Ensure we're sending the expected format to match backend ChatMsg[] type
         response = await api.post("/gemini", {
-          messages: apiMessages
+          messages: apiMessages,
         });
         console.log("API Response received via instance:", response.status);
       } catch (instanceError: any) {
-        console.warn("Error with API instance, trying direct axios call...", instanceError.message);
-        
+        console.warn(
+          "Error with API instance, trying direct axios call...",
+          instanceError.message
+        );
+
         // Fallback to direct axios call with full URL
         response = await axios({
-          method: 'post',
+          method: "post",
           url: `${API_BASE_URL}/gemini`,
           data: { messages: apiMessages }, // This should match the backend's expected format
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 30000
+          headers: { "Content-Type": "application/json" },
+          timeout: 30000,
         });
         console.log("API Response received via direct axios:", response.status);
       }
-      
+
       // Parse the response from the backend
       const botResponseText = response.data.nextMsg;
       console.log("Response", response);
@@ -422,14 +435,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         role: "model" as const,
         content: botResponseText,
       };
-      
+
       // Check if the response potentially contains location information
       // This is a basic attempt - in a production app you might want the backend to explicitly return location data
       const possibleLocationData = detectLocation(botResponseText);
       if (possibleLocationData) {
         botResponse.location = possibleLocationData;
       }
-      
+
       setMessages((prev) => [...prev, botResponse]);
       setIsLoading(false);
     } catch (error: any) {
@@ -439,41 +452,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       console.error("Error in handleSendMessage:", {
         message: error.message,
         stack: error.stack,
-        name: error.name
+        name: error.name,
       });
-      
+
       if (error.response) {
         // The request was made and the server responded with a status code outside the 2xx range
         console.error("Response error details:", {
           status: error.response.status,
           statusText: error.response.statusText,
           headers: error.response.headers,
-          data: error.response.data
+          data: error.response.data,
         });
       } else if (error.request) {
         // The request was made but no response was received
         console.error("Request sent but no response received:", error.request);
         console.log("Network status:", navigator.onLine ? "Online" : "Offline");
-        
+
         // Try a direct fetch as a last resort
         try {
           console.log("Attempting fetch API as last resort...");
           fetch(`${API_BASE_URL}/health`)
-            .then(res => console.log("Health check response:", res.status))
-            .catch(e => console.error("Even fetch failed:", e));
+            .then((res) => console.log("Health check response:", res.status))
+            .catch((e) => console.error("Even fetch failed:", e));
         } catch (e) {
           console.error("Final fetch attempt failed:", e);
         }
       } else {
         // Something happened in setting up the request
-        console.error("Request setup error:", error.message || 'Unknown error');
+        console.error("Request setup error:", error.message || "Unknown error");
       }
-      
+
       // Add an error message for the user
       const errorMessage: ChatMessage = {
         type: "text",
         role: "model",
-        content: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        content:
+          "Sorry, I'm having trouble connecting to the server. Please try again later.",
       };
       setMessages((prev) => [...prev, errorMessage]);
       setIsLoading(false);
@@ -496,18 +510,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     if (!file) return;
 
     // Check if the file is an image
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file');
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = async () => {
       let base64String = reader.result as string;
-      
+
       // Extract the base64 part (remove data:image/jpeg;base64, prefix)
-      if (base64String.includes(',')) {
-        base64String = base64String.split(',')[1];
+      if (base64String.includes(",")) {
+        base64String = base64String.split(",")[1];
       }
 
       // Add user image message with the full base64 string for display
@@ -522,52 +536,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       setIsLoading(true);
 
       try {
-        // First, call the image recognition API with our configured axios instance
-        console.log("Sending image to: /image/recognise (size: " + base64String.length + " chars)");
-        
-        let recognitionResponse;
-        try {
-          // First attempt with API instance
-          recognitionResponse = await api.post("/image/recognise", {
-            image: base64String
-          });
-        } catch (instanceError: any) {
-          console.warn("Error with API instance for image, trying direct axios call...", instanceError.message);
-          
-          // Fallback to direct axios call
-          recognitionResponse = await axios({
-            method: 'post',
-            url: `${API_BASE_URL}/image/recognise`,
-            data: { image: base64String },
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 30000
-          });
-        }
-        
-        // Get the recognition result
-        const recognitionResult = recognitionResponse.data;
-        console.log("recognitionResult", recognitionResult);
-        // Format a good message based on the recognition results
-        let recognitionMessage = "";
-        if (recognitionResult && !recognitionResult.error) {
-          // Check if we have name and recyclability info
-          if (recognitionResult.name) {
-            recognitionMessage = `I identified this as: ${recognitionResult.name}. `;
-            
-            if (recognitionResult.canBeRecycled !== undefined) {
-              recognitionMessage += recognitionResult.canBeRecycled ? 
-                "This item can be recycled in Singapore." : 
-                "This item cannot be recycled in Singapore.";
-            }
-          } else {
-            // Use raw response if we couldn't parse it properly
-            recognitionMessage = `Image recognition result: ${JSON.stringify(recognitionResult)}`;
-          }
-        } else {
-          // Handle error case
-          recognitionMessage = recognitionResult.error || "Sorry, I couldn't analyze this image properly.";
-        }
-        
         // Now send the image to the chat API with the recognition result as context
         // Only include the image and a follow-up question - no message history needed
         const apiMessages = [
@@ -575,65 +543,69 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
             type: "image" as const,
             role: "user" as const,
             mimeType: file.type,
-            content: base64String
-          }, 
+            content: base64String,
+          },
           {
             type: "text" as const,
             role: "user" as const,
-            content: "What is in this image and is it recyclable in Singapore?"
-          }
+            content: "What is in this image and is it recyclable in Singapore?",
+          },
         ];
-        
-        const botResponseToImage: ChatMessage = {
-          type: "text" as const,
-          role: "model" as const,
-          content: recognitionMessage
-        };
-        setMessages((prev) => [...prev, botResponseToImage]);
 
         // Call the Gemini API with fallback mechanism
         let response;
         try {
           response = await api.post("/gemini", {
-            messages: apiMessages
+            messages: apiMessages,
           });
         } catch (instanceError: any) {
-          console.warn("Error with API instance for image-related text, trying direct axios call...", instanceError.message);
-          
+          console.warn(
+            "Error with API instance for image-related text, trying direct axios call...",
+            instanceError.message
+          );
+
           // Fallback to direct axios call
           response = await axios({
-            method: 'post',
+            method: "post",
             url: `${API_BASE_URL}/gemini`,
             data: { messages: apiMessages },
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 30000
+            headers: { "Content-Type": "application/json" },
+            timeout: 30000,
           });
         }
-        
+
         // Get the bot's response
         const botResponse: ChatMessage = {
           type: "text" as const,
           role: "model" as const,
-          content: response.data.nextMsg || recognitionMessage
+          content: response.data.nextMsg,
         };
-        
+
         setMessages((prev) => [...prev, botResponse]);
       } catch (error: any) {
         console.error("Error processing image:", error);
         // More detailed error logging
         if (error.response) {
-          console.error("Response error:", error.response.status, error.response.data);
+          console.error(
+            "Response error:",
+            error.response.status,
+            error.response.data
+          );
         } else if (error.request) {
           console.error("Request error - no response received");
         } else {
-          console.error("Request setup error:", error.message || 'Unknown error');
+          console.error(
+            "Request setup error:",
+            error.message || "Unknown error"
+          );
         }
-        
+
         // Add an error message for the user
         const errorMessage: ChatMessage = {
           type: "text",
           role: "model",
-          content: "Sorry, I had trouble processing your image. Please try again later.",
+          content:
+            "Sorry, I had trouble processing your image. Please try again later.",
         };
         setMessages((prev) => [...prev, errorMessage]);
       } finally {
@@ -655,8 +627,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
           <div key={index}>
             <MessageBubble isUser={message.role === "user"}>
               {message.type === "text" ? (
-                <Markdown 
-                  remarkPlugins={[remarkGfm]} 
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeHighlight]}
                 >
                   {message.content}
