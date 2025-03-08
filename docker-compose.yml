@@ -5,13 +5,22 @@ services:
     build: 
       context: ./recycle-right-backend
     container_name: recycle-right-backend
+    # User is already set in Dockerfile, don't override it here
     ports:
       - "3001:3001"
     environment:
       - PORT=3001
       - NODE_ENV=production
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      # Uses the GEMINI_API_KEY from host environment or .env file
+    volumes:
+      - backend-node-modules:/app/node_modules
+    # Adding healthcheck to ensure backend is running correctly
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   recycle-right-frontend:
@@ -24,5 +33,10 @@ services:
       - recycle-right-backend
     environment:
       - REACT_APP_API_URL=http://recycle-right-backend:3001
-      # The Mapbox token is already in the Dockerfile but can be overridden here
+      - PORT=8080
     restart: unless-stopped
+
+# Define named volumes for data persistence
+volumes:
+  backend-node-modules:
+    # This volume stores node_modules to avoid permission issues

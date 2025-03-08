@@ -1,23 +1,19 @@
-# Use Node.js as base image
-FROM node:16-alpine
+FROM gdssingapore/airbase:node-22-builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy the rest of the application code
+# Copy everything to the container
 COPY . .
 
-# Build the application
-RUN npm run build
+# Install dependencies
+RUN npm install
 
 # Expose port 3001
 EXPOSE 3001
+
+# Set NODE_ENV
+ENV NODE_ENV=production
 
 # Command to run the application
 CMD ["npm", "start"]

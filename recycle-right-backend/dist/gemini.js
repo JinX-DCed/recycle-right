@@ -12,11 +12,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.callGemini = exports.recognizeImage = void 0;
 const generative_ai_1 = require("@google/generative-ai");
 const findNearestBin_1 = require("./findNearestBin");
+// Get API key from environment variables
 const API_KEY = process.env.GEMINI_API_KEY;
-if (!API_KEY) {
-    console.error('GEMINI_API_KEY is not defined in the environment variables!');
-    // Using a placeholder in development, but in production this should throw an error
-    // throw new Error('GEMINI_API_KEY is required');
+// Set a flag to track if we're using a real API key or a dummy one
+const isDummyKey = !API_KEY;
+// Demo responses for when no API key is available
+const DEMO_RESPONSES = [
+    "This is a demo response because no Gemini API key is configured. Please add a valid API key to enable real AI responses.",
+    "I'm unable to provide a real response without a Gemini API key. You can get a key from Google AI Studio.",
+    "To use the real AI capabilities, please configure a GEMINI_API_KEY in your backend environment variables.",
+    "This is a simulated response. For production use, please add your Gemini API key to the backend.",
+    "For testing purposes only: This would normally be answered by Google's Gemini AI if an API key was configured."
+];
+// Get a random demo response
+const getRandomDemoResponse = () => {
+    return DEMO_RESPONSES[Math.floor(Math.random() * DEMO_RESPONSES.length)];
+};
+if (isDummyKey) {
+    console.warn('⚠️ WARNING: GEMINI_API_KEY is not defined in the environment variables!');
+    console.warn('⚠️ Using DEMO MODE which will return mock responses.');
+    console.warn('⚠️ Please set the GEMINI_API_KEY environment variable to use the real API.');
+    console.warn('⚠️ In development, you can create a .env file in the backend directory with:');
+    console.warn('⚠️ GEMINI_API_KEY=your_actual_api_key');
 }
 // For use in Function calling by Gemini
 // Refer to here: https://ai.google.dev/gemini-api/docs/function-calling/tutorial?lang=node
@@ -25,7 +42,10 @@ const tools = {
         return (0, findNearestBin_1.getNearestBinCoordinates)(currentLongitude, currentLatitude);
     },
 };
-const genAI = new generative_ai_1.GoogleGenerativeAI(API_KEY || 'DUMMY_KEY_FOR_DEVELOPMENT');
+// Create the Google AI client with appropriate key and detailed logging
+const apiKeyToUse = API_KEY || 'DUMMY_KEY_FOR_DEVELOPMENT';
+console.log(`Using API key: ${isDummyKey ? 'DUMMY (WILL FAIL)' : 'VALID KEY PROVIDED'}`);
+const genAI = new generative_ai_1.GoogleGenerativeAI(apiKeyToUse);
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
     tools: [{ functionDeclarations: [findNearestBin_1.getNearestBinFunctionDeclaration] }],
@@ -57,7 +77,17 @@ const makeChatPart = (msg) => {
 };
 const recognizeImage = (imageBase64_1, ...args_1) => __awaiter(void 0, [imageBase64_1, ...args_1], void 0, function* (imageBase64, mimeType = "image/jpeg") {
     try {
-        console.log("Recognizing image with Gemini Vision");
+        // Early check if we're using a dummy key - provide demo response
+        if (isDummyKey) {
+            console.log("Using demo mode for image recognition");
+            // Return a simulated image recognition result
+            return {
+                name: "Demo Item",
+                canBeRecycled: true,
+                note: "This is a demo response because no Gemini API key is configured. Please add a valid API key."
+            };
+        }
+        console.log("Recognizing image with Gemini Vision - image length:", imageBase64.length);
         // Create a specialized prompt for image recognition
         const example = {
             name: "Empty bottle",
@@ -120,17 +150,39 @@ exports.recognizeImage = recognizeImage;
 const callGemini = (msges) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        // Make a copy of messages array to avoid modifying the original
-        const messagesCopy = [...msges];
-        const latestMsg = messagesCopy.pop();
-        if (!latestMsg) {
-            console.error("No chat message found!");
-            return "Error: No chat message provided. Please try again.";
+        // Early check if we're using a dummy key - provide demo response instead of error
+        if (isDummyKey) {
+            console.log("Using demo mode - returning simulated response");
+            // Extract user's message to personalize the demo response
+            let userMessage = "";
+            if (msges.length > 0) {
+                const lastMsg = msges[msges.length - 1];
+                if (lastMsg.type === "text" && lastMsg.role === "user") {
+                    userMessage = lastMsg.content;
+                }
+            }
+            // Return a demo response that acknowledges the user's message
+            return `[DEMO MODE] I received your message: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}". ${getRandomDemoResponse()}`;
         }
+        // Log the incoming messages
+        console.log(`Calling Gemini with ${msges.length} messages`);
+        // Since the frontend is now only sending the latest message(s),
+        // we don't need to pop the last message anymore. Instead, we directly
+        // use what's provided in the array.
+        if (msges.length === 0) {
+            console.error("No messages found!");
+            return "Error: No messages provided. Please try again.";
+        }
+        // Get the latest message - for image + text requests, text will be last
+        const latestMsg = msges[msges.length - 1];
+        // Previous messages could include an image in the case of image recognition
+        const previousMessages = msges.length > 1 ? msges.slice(0, -1) : [];
         let chat;
         try {
-            if (messagesCopy.length > 0) {
-                const chatHistory = messagesCopy.map((msg) => ({
+            if (previousMessages.length > 0) {
+                // If we have previous messages (like an image before a text question)
+                // use them as chat history
+                const chatHistory = previousMessages.map((msg) => ({
                     role: msg.role,
                     parts: [makeChatPart(msg)],
                 }));
@@ -139,6 +191,7 @@ const callGemini = (msges) => __awaiter(void 0, void 0, void 0, function* () {
                 });
             }
             else {
+                // Otherwise just start a fresh chat
                 chat = model.startChat();
             }
             console.log("Sending message to Gemini API...");
