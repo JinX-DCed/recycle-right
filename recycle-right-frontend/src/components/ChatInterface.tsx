@@ -10,6 +10,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import 'highlight.js/styles/github.css';
 import axios from "axios";
 
 // Types as specified in the requirements
@@ -61,6 +64,62 @@ const MessageBubble = styled.div<{ isUser: boolean }>`
   background-color: ${(props) => (props.isUser ? "#dcf8c6" : "#f0f0f0")};
   align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
   word-break: break-word;
+  
+  /* Markdown styling */
+  & pre {
+    background-color: #f1f1f1;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+  }
+  
+  & code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+  
+  & table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    width: 100%;
+  }
+  
+  & th, & td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  & th {
+    background-color: #f2f2f2;
+    text-align: left;
+  }
+  
+  & blockquote {
+    margin: 0;
+    padding-left: 10px;
+    border-left: 3px solid #ccc;
+    color: #666;
+  }
+  
+  & img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  & a {
+    color: #00a108;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  & ul, & ol {
+    margin: 10px 0;
+    padding-left: 20px;
+  }
 `;
 
 const ImageMessage = styled.img`
@@ -525,6 +584,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
           }
         ];
         
+        const botResponseToImage: ChatMessage = {
+          type: "text" as const,
+          role: "model" as const,
+          content: recognitionMessage
+        };
+        setMessages((prev) => [...prev, botResponseToImage]);
+
         // Call the Gemini API with fallback mechanism
         let response;
         try {
@@ -589,7 +655,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
           <div key={index}>
             <MessageBubble isUser={message.role === "user"}>
               {message.type === "text" ? (
-                <Markdown>{message.content}</Markdown>
+                <Markdown 
+                  remarkPlugins={[remarkGfm]} 
+                  rehypePlugins={[rehypeHighlight]}
+                >
+                  {message.content}
+                </Markdown>
               ) : (
                 <ImageMessage src={message.content} alt="User uploaded image" />
               )}
