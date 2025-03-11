@@ -21,7 +21,7 @@ const DEMO_RESPONSES = [
   "I'm unable to provide a real response without a Gemini API key. You can get a key from Google AI Studio.",
   "To use the real AI capabilities, please configure a GEMINI_API_KEY in your backend environment variables.",
   "This is a simulated response. For production use, please add your Gemini API key to the backend.",
-  "For testing purposes only: This would normally be answered by Google's Gemini AI if an API key was configured."
+  "For testing purposes only: This would normally be answered by Google's Gemini AI if an API key was configured.",
 ];
 
 // Get a random demo response
@@ -30,11 +30,17 @@ const getRandomDemoResponse = () => {
 };
 
 if (isDummyKey) {
-  console.warn('⚠️ WARNING: GEMINI_API_KEY is not defined in the environment variables!');
-  console.warn('⚠️ Using DEMO MODE which will return mock responses.');
-  console.warn('⚠️ Please set the GEMINI_API_KEY environment variable to use the real API.');
-  console.warn('⚠️ In development, you can create a .env file in the backend directory with:');
-  console.warn('⚠️ GEMINI_API_KEY=your_actual_api_key');
+  console.warn(
+    "⚠️ WARNING: GEMINI_API_KEY is not defined in the environment variables!"
+  );
+  console.warn("⚠️ Using DEMO MODE which will return mock responses.");
+  console.warn(
+    "⚠️ Please set the GEMINI_API_KEY environment variable to use the real API."
+  );
+  console.warn(
+    "⚠️ In development, you can create a .env file in the backend directory with:"
+  );
+  console.warn("⚠️ GEMINI_API_KEY=your_actual_api_key");
 }
 
 // For use in Function calling by Gemini
@@ -52,8 +58,10 @@ const tools: { [key: string]: any } = {
 };
 
 // Create the Google AI client with appropriate key and detailed logging
-const apiKeyToUse = API_KEY || 'DUMMY_KEY_FOR_DEVELOPMENT';
-console.log(`Using API key: ${isDummyKey ? 'DUMMY (WILL FAIL)' : 'VALID KEY PROVIDED'}`);
+const apiKeyToUse = API_KEY || "DUMMY_KEY_FOR_DEVELOPMENT";
+console.log(
+  `Using API key: ${isDummyKey ? "DUMMY (WILL FAIL)" : "VALID KEY PROVIDED"}`
+);
 const genAI = new GoogleGenerativeAI(apiKeyToUse);
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash",
@@ -62,9 +70,10 @@ const model = genAI.getGenerativeModel({
   systemInstruction:
     "You will be talking about recycling in Singapore." +
     " If you are asked to identify items, there might be multiple items in the image, try to identify them all." +
+    " If it looks like the item is made of different materials and those materials should be separated for recycling, give suggestions for those as well." +
     " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
     " Besides the nearest bin, a few alternatives should also be included in the response." +
-    " If formatting of the response is required, use HTML formatting instead of Markdown." +
+    // " If formatting of the response is required, use HTML formatting instead of Markdown." +
     " Make the responses easy to read, with short sentences and paragraphs, and listing in points if possible.",
 });
 
@@ -95,53 +104,61 @@ const makeChatPart = (msg: ChatMsg): Part => {
   }
 };
 
-export const recognizeImage = async (imageBase64: string, mimeType: string = "image/jpeg") => {
+export const recognizeImage = async (
+  imageBase64: string,
+  mimeType: string = "image/jpeg"
+) => {
   try {
     // Early check if we're using a dummy key - provide demo response
     if (isDummyKey) {
       console.log("Using demo mode for image recognition");
-      
+
       // Return a simulated image recognition result
       return {
         name: "Demo Item",
         canBeRecycled: true,
-        note: "This is a demo response because no Gemini API key is configured. Please add a valid API key."
+        note: "This is a demo response because no Gemini API key is configured. Please add a valid API key.",
       };
     }
-    
-    console.log("Recognizing image with Gemini Vision - image length:", imageBase64.length);
-    
+
+    console.log(
+      "Recognizing image with Gemini Vision - image length:",
+      imageBase64.length
+    );
+
     // Create a specialized prompt for image recognition
     const example = {
       name: "Empty bottle",
       canBeRecycled: true,
     };
-    
+
     const textPrompt: ChatMsg = {
       type: "text",
       role: "user",
-      content: "The following is a base64 encoded image of one or more items. Return in JSON format two pieces of information. 1) The generic name(s) of the item(s). 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " + 
-        JSON.stringify(example) + ". IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or backticks."
+      content:
+        "The following is a base64 encoded image of one or more items. Return in JSON format two pieces of information. 1) The generic name(s) of the item(s). 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
+        JSON.stringify(example) +
+        ". IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or backticks.",
     };
-    
+
     const imagePrompt: ChatMsg = {
       type: "image",
       role: "user",
       content: imageBase64,
       mimeType: mimeType,
     };
-    
+
     const messages: ChatMsg[] = [textPrompt, imagePrompt];
-    
+
     // Use the general callGemini function to process the request
     const result = await callGemini(messages);
-    
+
     // Process the result to ensure it's valid JSON
     try {
       // Check if the response is wrapped in markdown code block
       let jsonData: any;
-      
-      if (typeof result === 'string' && result.includes('```')) {
+
+      if (typeof result === "string" && result.includes("```")) {
         // Extract content between code blocks
         const jsonMatch = result.match(/```(?:json)?\s*([\s\S]*?)```/);
         if (jsonMatch && jsonMatch[1]) {
@@ -153,22 +170,22 @@ export const recognizeImage = async (imageBase64: string, mimeType: string = "im
         }
       } else {
         // If not wrapped in code block, try direct parsing
-        jsonData = typeof result === 'string' ? JSON.parse(result) : result;
+        jsonData = typeof result === "string" ? JSON.parse(result) : result;
       }
-      
+
       return jsonData;
     } catch (error) {
-      console.error('Error parsing Gemini response:', error);
+      console.error("Error parsing Gemini response:", error);
       return {
-        error: 'Failed to parse response from image recognition',
-        rawResponse: result
+        error: "Failed to parse response from image recognition",
+        rawResponse: result,
       };
     }
   } catch (error) {
     console.error("Error in recognizeImage:", error);
     return {
-      error: 'An unexpected error occurred during image recognition',
-      message: error instanceof Error ? error.message : String(error)
+      error: "An unexpected error occurred during image recognition",
+      message: error instanceof Error ? error.message : String(error),
     };
   }
 };
@@ -186,26 +203,29 @@ export const callGemini = async (msges: ChatMsg[]) => {
           userMessage = lastMsg.content;
         }
       }
-      
+
       // Return a demo response that acknowledges the user's message
-      return `[DEMO MODE] I received your message: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}". ${getRandomDemoResponse()}`;
+      return `[DEMO MODE] I received your message: "${userMessage.substring(
+        0,
+        50
+      )}${userMessage.length > 50 ? "..." : ""}". ${getRandomDemoResponse()}`;
     }
-    
+
     // Log the incoming messages
     console.log(`Calling Gemini with ${msges.length} messages`);
-    
+
     // Since the frontend is now only sending the latest message(s),
     // we don't need to pop the last message anymore. Instead, we directly
     // use what's provided in the array.
-    
+
     if (msges.length === 0) {
       console.error("No messages found!");
       return "Error: No messages provided. Please try again.";
     }
-    
+
     // Get the latest message - for image + text requests, text will be last
     const latestMsg = msges[msges.length - 1];
-    
+
     // Previous messages could include an image in the case of image recognition
     const previousMessages = msges.length > 1 ? msges.slice(0, -1) : [];
 
@@ -243,12 +263,14 @@ export const callGemini = async (msges: ChatMsg[]) => {
         // If there is a function call by Gemini
         if (call) {
           console.log("Function call: ", call.name, "with args:", call.args);
-          
+
           if (!tools[call.name]) {
-            console.error(`Function ${call.name} was called but is not defined in tools.`);
+            console.error(
+              `Function ${call.name} was called but is not defined in tools.`
+            );
             return `The AI attempted to use a function that isn't available. Please try a different question.`;
           }
-          
+
           const funcCallResult = tools[call.name](call.args);
 
           const result2 = await chat.sendMessage([
