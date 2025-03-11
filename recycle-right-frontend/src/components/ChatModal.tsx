@@ -1,8 +1,8 @@
-import React from 'react';
-import styled from 'styled-components';
-import ChatInterface from './ChatInterface';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import React from "react";
+import styled from "styled-components";
+import ChatInterface from "./ChatInterface";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -21,7 +21,7 @@ const ModalContent = styled.div`
   background-color: white;
   width: 90%;
   max-width: 450px;
-  height: 80vh;
+  height: 100%;
   border-radius: 12px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -54,7 +54,7 @@ const CloseButton = styled.button`
   align-items: center;
   justify-content: center;
   padding: 8px;
-  
+
   &:focus {
     outline: none;
   }
@@ -81,7 +81,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent onClick={handleContentClick}>
         <ModalHeader>
-          <Title>Recycling Assistant</Title>
+          <Title>Trashtalker</Title>
           <CloseButton onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} />
           </CloseButton>
