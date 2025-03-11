@@ -48,6 +48,47 @@ const ChatContainer = styled.div`
   overflow: hidden;
 `;
 
+// Create a menu container that will contain a title on top, followed by buttons arranged in 2 columns
+const MenuContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  gap: 20px;
+  height: 100%;
+`;
+
+const MenuTitle = styled.h2`
+  color: #00a108;
+  text-align: center;
+  margin: 0;
+`;
+
+const ButtonGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+`;
+
+const MenuButton = styled.button`
+  background-color: #00a108;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  text-align: center;
+
+  &:hover {
+    background-color: #008c06;
+  }
+`;
+
 const MessagesContainer = styled.div`
   flex-grow: 1;
   overflow-y: auto;
@@ -216,16 +257,10 @@ const ImageButton = styled.button`
   border: none;
   color: #00a108;
   margin-right: 8px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-
-  &:disabled {
-    color: #cccccc;
-    cursor: not-allowed;
-  }
 `;
 
 const FileInput = styled.input`
@@ -233,13 +268,7 @@ const FileInput = styled.input`
 `;
 
 // Sample initial message
-const initialMessages: ChatMsges = [
-  {
-    type: "text",
-    role: "user",
-    content: "Hey, what can I help you with today?",
-  },
-];
+const initialMessages: ChatMsges = [];
 
 interface ChatInterfaceProps {
   onClose: () => void;
@@ -309,7 +338,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMenu, setShowMenu] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      setShowMenu(false);
+    }
+  }, [messages]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -357,22 +393,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     navigate("/binmap");
   };
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim() || isLoading) return;
-
-    // Add user message
-    const userMessage: ChatMessage = {
-      type: "text" as const,
-      role: "user" as const,
-      content: inputText,
-    };
-
-    // Check if the message contains a location
-    const locationData = detectLocation(inputText);
-    if (locationData) {
-      userMessage.location = locationData;
-    }
-
+  const sendMessage = async (userMessage: ChatMessage) => {
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
@@ -492,6 +513,25 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       setMessages((prev) => [...prev, errorMessage]);
       setIsLoading(false);
     }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    // Add user message
+    const userMessage: ChatMessage = {
+      type: "text" as const,
+      role: "user" as const,
+      content: inputText,
+    };
+
+    // Check if the message contains a location
+    const locationData = detectLocation(inputText);
+    if (locationData) {
+      userMessage.location = locationData;
+    }
+
+    sendMessage(userMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -620,47 +660,81 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     }
   };
 
+  // Get the content of the button and set it in messages. The argument should be of type MouseEvent<HTMLButtonElement>
+  const handleMenuButtonTap = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const userMessage: ChatMessage = {
+      type: "text",
+      role: "user",
+      content: e.currentTarget.textContent || "",
+    };
+    sendMessage(userMessage);
+    setShowMenu(false);
+  };
+
   return (
     <ChatContainer>
-      <MessagesContainer>
-        {messages.map((message, index) => (
-          <div key={index}>
-            <MessageBubble isUser={message.role === "user"}>
-              {message.type === "text" ? (
-                <Markdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {message.content}
-                </Markdown>
-              ) : (
-                <ImageMessage src={message.content} alt="User uploaded image" />
-              )}
-            </MessageBubble>
-
-            {/* Location card if message has location */}
-            {message.location && (
-              <LocationCard>
-                <LocationHeader>
-                  <FontAwesomeIcon icon={faMapMarkerAlt} />
-                  {message.location.name || "Location Found"}
-                </LocationHeader>
-                <LocationContent>
-                  <div>Latitude: {message.location.lat.toFixed(6)}</div>
-                  <div>Longitude: {message.location.lng.toFixed(6)}</div>
-                  <LocationButton
-                    onClick={() => handleDirectToLocation(message.location!)}
+      {showMenu ? (
+        <MenuContainer>
+          <MenuTitle>Hey, what can I help you with today?</MenuTitle>
+          <ButtonGrid>
+            <MenuButton onClick={handleMenuButtonTap}>
+              Nearest recycling bin or station
+            </MenuButton>
+            <MenuButton onClick={handleMenuButtonTap}>
+              Tell me if this can be recycled
+            </MenuButton>
+            <MenuButton onClick={handleMenuButtonTap}>
+              Report an issue
+            </MenuButton>
+            <MenuButton onClick={handleMenuButtonTap}>
+              Drop a recycling fact
+            </MenuButton>
+          </ButtonGrid>
+        </MenuContainer>
+      ) : (
+        <MessagesContainer>
+          {messages.map((message, index) => (
+            <div key={index}>
+              <MessageBubble isUser={message.role === "user"}>
+                {message.type === "text" ? (
+                  <Markdown
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
                   >
-                    <FontAwesomeIcon icon={faDirections} />
-                    Get Directions
-                  </LocationButton>
-                </LocationContent>
-              </LocationCard>
-            )}
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </MessagesContainer>
+                    {message.content}
+                  </Markdown>
+                ) : (
+                  <ImageMessage
+                    src={message.content}
+                    alt="User uploaded image"
+                  />
+                )}
+              </MessageBubble>
+
+              {/* Location card if message has location */}
+              {message.location && (
+                <LocationCard>
+                  <LocationHeader>
+                    <FontAwesomeIcon icon={faMapMarkerAlt} />
+                    {message.location.name || "Location Found"}
+                  </LocationHeader>
+                  <LocationContent>
+                    <div>Latitude: {message.location.lat.toFixed(6)}</div>
+                    <div>Longitude: {message.location.lng.toFixed(6)}</div>
+                    <LocationButton
+                      onClick={() => handleDirectToLocation(message.location!)}
+                    >
+                      <FontAwesomeIcon icon={faDirections} />
+                      Get Directions
+                    </LocationButton>
+                  </LocationContent>
+                </LocationCard>
+              )}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </MessagesContainer>
+      )}
 
       <InputContainer>
         <ImageButton onClick={handleImageUpload} disabled={isLoading}>
