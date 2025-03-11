@@ -73,7 +73,6 @@ const model = genAI.getGenerativeModel({
     " If it looks like the item is made of different materials and those materials should be separated for recycling, give suggestions for those as well." +
     " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
     " Besides the nearest bin, a few alternatives should also be included in the response." +
-    // " If formatting of the response is required, use HTML formatting instead of Markdown." +
     " Make the responses easy to read, with short sentences and paragraphs, and listing in points if possible.",
 });
 
