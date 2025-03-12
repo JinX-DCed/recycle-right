@@ -14,9 +14,33 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github.css";
 import axios from "axios";
+import {
+  ChatContainer,
+  MenuContainer,
+  MenuTitle,
+  ButtonGrid,
+  MenuButton,
+  MessagesContainer,
+  MessageBubble,
+  ImageMessage,
+  LocationCard,
+  LocationHeader,
+  LocationContent,
+  LocationButton,
+  InputContainer,
+  ImageButton,
+  FileInput,
+  MessageInput,
+  SendButton,
+  QuickOptionsMenu,
+  QuickOption,
+} from "./ChatComponents";
 
 // Types as specified in the requirements
-type ChatMsges = {
+type ChatMsges = ChatMessage[];
+
+// Define a type for a single message
+type ChatMessage = {
   type: "text" | "image"; // Whether this message is text or an image
   role: "model" | "user"; // Whether this message is sent by the user or the AI model
   mimeType?: string; // Required if type is "image"
@@ -26,246 +50,7 @@ type ChatMsges = {
     lng: number;
     name?: string;
   }; // Optional location data
-}[];
-
-// Define a type for a single message
-type ChatMessage = {
-  type: "text" | "image";
-  role: "model" | "user";
-  mimeType?: string;
-  content: string;
-  location?: {
-    lat: number;
-    lng: number;
-    name?: string;
-  };
 };
-
-const ChatContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-`;
-
-// Create a menu container that will contain a title on top, followed by buttons arranged in 2 columns
-const MenuContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  gap: 20px;
-  height: 100%;
-`;
-
-const MenuTitle = styled.h2`
-  color: #00a108;
-  text-align: center;
-  margin: 0;
-`;
-
-const ButtonGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-`;
-
-const MenuButton = styled.button`
-  background-color: #00a108;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  width: 100%;
-  text-align: center;
-
-  &:hover {
-    background-color: #008c06;
-  }
-`;
-
-const MessagesContainer = styled.div`
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
-
-const MessageBubble = styled.div<{ isUser: boolean }>`
-  max-width: 80%;
-  padding: 12px 16px;
-  border-radius: 18px;
-  background-color: ${(props) => (props.isUser ? "#dcf8c6" : "#f0f0f0")};
-  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
-  word-break: break-word;
-
-  /* Markdown styling */
-  & pre {
-    background-color: #f1f1f1;
-    border-radius: 6px;
-    padding: 12px;
-    overflow-x: auto;
-  }
-
-  & code {
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: monospace;
-  }
-
-  & table {
-    border-collapse: collapse;
-    margin: 10px 0;
-    width: 100%;
-  }
-
-  & th,
-  & td {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
-
-  & th {
-    background-color: #f2f2f2;
-    text-align: left;
-  }
-
-  & blockquote {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 3px solid #ccc;
-    color: #666;
-  }
-
-  & img {
-    max-width: 100%;
-    height: auto;
-  }
-
-  & a {
-    color: #00a108;
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  & ul,
-  & ol {
-    margin: 10px 0;
-    padding-left: 20px;
-  }
-`;
-
-const ImageMessage = styled.img`
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-`;
-
-const LocationCard = styled.div`
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  margin-top: 8px;
-  overflow: hidden;
-`;
-
-const LocationHeader = styled.div`
-  background-color: #00a108;
-  color: white;
-  padding: 10px 16px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const LocationContent = styled.div`
-  padding: 12px 16px;
-`;
-
-const LocationButton = styled.button`
-  background-color: #00a108;
-  color: white;
-  border: none;
-  border-radius: 24px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  margin-top: 12px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #008c06;
-  }
-`;
-
-const InputContainer = styled.div`
-  display: flex;
-  padding: 12px;
-  border-top: 1px solid #e0e0e0;
-  background-color: white;
-`;
-
-const MessageInput = styled.input`
-  flex-grow: 1;
-  padding: 12px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 24px;
-  outline: none;
-  font-size: 16px;
-
-  &:focus {
-    border-color: #00a108;
-  }
-`;
-
-const SendButton = styled.button`
-  background: #00a108;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  margin-left: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:disabled {
-    background: #cccccc;
-    cursor: not-allowed;
-  }
-`;
-
-const ImageButton = styled.button`
-  background: none;
-  border: none;
-  color: #00a108;
-  margin-right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-`;
-
-const FileInput = styled.input`
-  display: none;
-`;
 
 // Sample initial message
 const initialMessages: ChatMsges = [];
@@ -331,6 +116,20 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+const makeChatMsg = (
+  content: string,
+  role: "model" | "user",
+  type: "text" | "image",
+  mimeType?: string
+): ChatMessage => {
+  return {
+    type,
+    role,
+    content,
+    mimeType,
+  };
+};
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   const [messages, setMessages] = useState<ChatMsges>(initialMessages);
@@ -504,12 +303,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       }
 
       // Add an error message for the user
-      const errorMessage: ChatMessage = {
-        type: "text",
-        role: "model",
-        content:
-          "Sorry, I'm having trouble connecting to the server. Please try again later.",
-      };
+      const errorMessage = makeChatMsg(
+        "Sorry, I'm having trouble connecting to the server. Please try again later.",
+        "model",
+        "text"
+      );
       setMessages((prev) => [...prev, errorMessage]);
       setIsLoading(false);
     }
@@ -565,13 +363,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       }
 
       // Add user image message with the full base64 string for display
-      const imageMessage: ChatMessage = {
-        type: "image" as const,
-        role: "user" as const,
-        mimeType: file.type,
-        content: reader.result as string, // Keep the full string for display
-      };
-
+      const imageMessage = makeChatMsg(
+        reader.result as string, // Keep the full string for display
+        "user",
+        "image",
+        file.type
+      );
       setMessages((prev) => [...prev, imageMessage]);
       setIsLoading(true);
 
@@ -615,12 +412,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         }
 
         // Get the bot's response
-        const botResponse: ChatMessage = {
-          type: "text" as const,
-          role: "model" as const,
-          content: response.data.nextMsg,
-        };
-
+        const botResponse = makeChatMsg(response.data.nextMsg, "model", "text");
         setMessages((prev) => [...prev, botResponse]);
       } catch (error: any) {
         console.error("Error processing image:", error);
@@ -641,12 +433,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         }
 
         // Add an error message for the user
-        const errorMessage: ChatMessage = {
-          type: "text",
-          role: "model",
-          content:
-            "Sorry, I had trouble processing your image. Please try again later.",
-        };
+        const errorMessage = makeChatMsg(
+          "Sorry, I had trouble processing your image. Please try again later.",
+          "model",
+          "text"
+        );
         setMessages((prev) => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
