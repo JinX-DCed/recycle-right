@@ -16,7 +16,7 @@ const Title = styled.h2`
 `;
 
 const Button = styled.button`
-  background-color: #00a108;
+  background-color: #CDD3FD;
   color: white;
   padding: 10px 16px;
   border: none;
@@ -25,7 +25,7 @@ const Button = styled.button`
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #008a06;
+    background-color: #612f7e;
   }
 `;
 
@@ -110,7 +110,7 @@ const RecordDate = styled.span`
 
 const RecordPoints = styled.span`
   font-weight: bold;
-  color: #00a108;
+  color: rgb(93, 40, 104);
 `;
 
 const ExpandableContent = styled.div`
