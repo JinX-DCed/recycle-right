@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPaperPlane,
@@ -7,6 +6,8 @@ import {
   faMapMarkerAlt,
   faDirections,
   faSpinner,
+  faCirclePlus,
+  faLocationDot,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Markdown from "react-markdown";
@@ -138,6 +139,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showMenu, setShowMenu] = useState(true);
+  const [showQuickOptions, setShowQuickOptions] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -177,6 +179,46 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     }
 
     return null;
+  };
+
+  // Callback to get user's current location in terms of longitude and latitude
+  const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
+    setIsLoading(true);
+
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by your browser"));
+        setMessages((prev) => [
+          ...prev,
+          makeChatMsg(
+            "Geolocation is not supported by your browser",
+            "model",
+            "text"
+          ),
+        ]);
+        setIsLoading(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setIsLoading(false);
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setIsLoading(false);
+          reject(new Error(`Error getting location: ${error.message}`));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    });
   };
 
   const handleDirectToLocation = (location: { lat: number; lng: number }) => {
@@ -462,6 +504,25 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     setShowMenu(false);
   };
 
+  const handleQuickOptionsImageTap = () => {
+    handleImageUpload();
+    setShowQuickOptions(false);
+  };
+
+  const handleQuickOptionsLocationTap = async () => {
+    const location = await getCurrentLocation();
+    if (location) {
+      const userMessage: ChatMessage = {
+        type: "text",
+        role: "user",
+        content: `I'm at these coordinates: latitude is ${location.lat}, longitude is ${location.lng}`,
+        location,
+      };
+      sendMessage(userMessage);
+    }
+    setShowQuickOptions(false);
+  };
+
   return (
     <ChatContainer>
       {showMenu ? (
@@ -527,9 +588,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         </MessagesContainer>
       )}
 
+      {showQuickOptions ? (
+        <QuickOptionsMenu>
+          <QuickOption onClick={handleQuickOptionsImageTap}>
+            <FontAwesomeIcon icon={faImage} /> Upload an image
+          </QuickOption>
+          <QuickOption onClick={handleQuickOptionsLocationTap}>
+            <FontAwesomeIcon icon={faLocationDot} /> Share location
+          </QuickOption>
+        </QuickOptionsMenu>
+      ) : null}
+
       <InputContainer>
-        <ImageButton onClick={handleImageUpload} disabled={isLoading}>
-          <FontAwesomeIcon icon={faImage} />
+        <ImageButton onClick={() => setShowQuickOptions(true)}>
+          <FontAwesomeIcon icon={faCirclePlus} />
         </ImageButton>
         <FileInput
           type="file"
