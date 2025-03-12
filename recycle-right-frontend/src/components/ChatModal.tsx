@@ -32,16 +32,17 @@ const ModalContent = styled.div`
 
 const ModalHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 16px;
-  background-color: #00a108;
+  background-color: #B9C9BF;
   color: white;
 `;
 
 const Title = styled.h2`
   font-size: 1.25rem;
   margin: 0;
+  padding: 8px;
 `;
 
 const CloseButton = styled.button`
@@ -58,6 +59,13 @@ const CloseButton = styled.button`
   &:focus {
     outline: none;
   }
+`;
+
+const IconContainer = styled.div`
+  flex: 0 0 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 interface ChatModalProps {
@@ -81,10 +89,17 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent onClick={handleContentClick}>
         <ModalHeader>
-          <Title>Trashtalker</Title>
           <CloseButton onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} />
           </CloseButton>
+          <IconContainer>
+            <img
+              src={require('../logo.png')}
+              alt="Uploaded"
+              style={{ maxWidth: "100%" }}
+            />
+            </IconContainer>
+          <Title>Trashtalker</Title>
         </ModalHeader>
         <ChatInterface onClose={onClose} />
       </ModalContent>

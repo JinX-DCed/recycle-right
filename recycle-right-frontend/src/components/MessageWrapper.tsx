@@ -5,7 +5,7 @@ import styled from 'styled-components';
 const StyledWrapper = styled.div<{ isUser: boolean }>`
   display: flex;
   flex-direction: column;
-  align-self: ${(props) => (props.isUser ? "flex-start" : "flex-end")};
+  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
   max-width: 80%;
   margin-bottom: 8px;
 `;

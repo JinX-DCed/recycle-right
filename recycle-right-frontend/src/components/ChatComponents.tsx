@@ -17,7 +17,7 @@ export const MenuContainer = styled.div`
 `;
 
 export const MenuTitle = styled.h2`
-  color: #00a108;
+  color: #2E282A;
   text-align: center;
   margin: 0;
 `;
@@ -30,20 +30,20 @@ export const ButtonGrid = styled.div`
 `;
 
 export const MenuButton = styled.button`
-  background-color: #00a108;
-  color: white;
-  border: none;
+  background-color: white;
+  color: #8390FA;
+  border: 2px solid #8390FA;
   border-radius: 12px;
   padding: 16px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   width: 100%;
   text-align: center;
 
   &:hover {
-    background-color: #008c06;
+    background-color: #f0f8ff;
   }
 `;
 
@@ -137,7 +137,7 @@ export const LocationCard = styled.div`
 `;
 
 export const LocationHeader = styled.div`
-  background-color: #00a108;
+  background-color: #B9C9BF;
   color: white;
   padding: 10px 16px;
   font-weight: 500;
@@ -151,7 +151,7 @@ export const LocationContent = styled.div`
 `;
 
 export const LocationButton = styled.button`
-  background-color: #00a108;
+  background-color: #8390FA;
   color: white;
   border: none;
   border-radius: 24px;
@@ -185,10 +185,10 @@ export const QuickOption = styled.button`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #8390FA;
   border-radius: 16px;
   background-color: white;
-  color: #00a108;
+  color: #8390FA;
   font-size: 14px;
   white-space: nowrap;
   cursor: pointer;
@@ -220,12 +220,12 @@ export const MessageInput = styled.input`
   font-size: 16px;
 
   &:focus {
-    border-color: #00a108;
+    border-color: #585355;
   }
 `;
 
 export const SendButton = styled.button`
-  background: #00a108;
+  background: #8390FA;
   color: white;
   border: none;
   border-radius: 50%;
@@ -246,7 +246,7 @@ export const SendButton = styled.button`
 export const ImageButton = styled.button`
   background: none;
   border: none;
-  color: #00a108;
+  color: #8390FA;
   margin-right: 8px;
   display: flex;
   align-items: center;
