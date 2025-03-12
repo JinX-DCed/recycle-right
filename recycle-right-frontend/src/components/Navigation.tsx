@@ -1,9 +1,8 @@
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook, faMap, faChartBar } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import BinMapModal from './BinMapModal';
 import ResourcesModal from './ResourcesModal';
+import { useNavigate } from 'react-router-dom';
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -40,6 +39,7 @@ const NavButton = styled.button`
 const Navigation = () => {
   const [isBinMapOpen, setIsBinMapOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleOpenBinMap = () => {
     setIsBinMapOpen(true);
@@ -56,6 +56,10 @@ const Navigation = () => {
   const handleCloseResources = () => {
     setIsResourcesOpen(false);
   };
+  
+  const handleNavigateToStatistics = () => {
+    navigate('/statistics');
+  };
 
   return (
     <>
@@ -68,8 +72,7 @@ const Navigation = () => {
           {/* <FontAwesomeIcon icon={faMap} />  */}
           Bin map
         </NavButton>
-        <NavButton>
-          {/* <FontAwesomeIcon icon={faChartBar} />  */}
+        <NavButton onClick={handleNavigateToStatistics}>
           Statistics
         </NavButton>
       </NavigationContainer>

@@ -22,18 +22,18 @@ const DEMO_RESPONSES = [
     "I'm unable to provide a real response without a Gemini API key. You can get a key from Google AI Studio.",
     "To use the real AI capabilities, please configure a GEMINI_API_KEY in your backend environment variables.",
     "This is a simulated response. For production use, please add your Gemini API key to the backend.",
-    "For testing purposes only: This would normally be answered by Google's Gemini AI if an API key was configured."
+    "For testing purposes only: This would normally be answered by Google's Gemini AI if an API key was configured.",
 ];
 // Get a random demo response
 const getRandomDemoResponse = () => {
     return DEMO_RESPONSES[Math.floor(Math.random() * DEMO_RESPONSES.length)];
 };
 if (isDummyKey) {
-    console.warn('⚠️ WARNING: GEMINI_API_KEY is not defined in the environment variables!');
-    console.warn('⚠️ Using DEMO MODE which will return mock responses.');
-    console.warn('⚠️ Please set the GEMINI_API_KEY environment variable to use the real API.');
-    console.warn('⚠️ In development, you can create a .env file in the backend directory with:');
-    console.warn('⚠️ GEMINI_API_KEY=your_actual_api_key');
+    console.warn("⚠️ WARNING: GEMINI_API_KEY is not defined in the environment variables!");
+    console.warn("⚠️ Using DEMO MODE which will return mock responses.");
+    console.warn("⚠️ Please set the GEMINI_API_KEY environment variable to use the real API.");
+    console.warn("⚠️ In development, you can create a .env file in the backend directory with:");
+    console.warn("⚠️ GEMINI_API_KEY=your_actual_api_key");
 }
 // For use in Function calling by Gemini
 // Refer to here: https://ai.google.dev/gemini-api/docs/function-calling/tutorial?lang=node
@@ -43,8 +43,8 @@ const tools = {
     },
 };
 // Create the Google AI client with appropriate key and detailed logging
-const apiKeyToUse = API_KEY || 'DUMMY_KEY_FOR_DEVELOPMENT';
-console.log(`Using API key: ${isDummyKey ? 'DUMMY (WILL FAIL)' : 'VALID KEY PROVIDED'}`);
+const apiKeyToUse = API_KEY || "DUMMY_KEY_FOR_DEVELOPMENT";
+console.log(`Using API key: ${isDummyKey ? "DUMMY (WILL FAIL)" : "VALID KEY PROVIDED"}`);
 const genAI = new generative_ai_1.GoogleGenerativeAI(apiKeyToUse);
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
@@ -52,9 +52,9 @@ const model = genAI.getGenerativeModel({
     // This is the instruction that can be used to constrain and give more context to the model
     systemInstruction: "You will be talking about recycling in Singapore." +
         " If you are asked to identify items, there might be multiple items in the image, try to identify them all." +
+        " If it looks like the item is made of different materials and those materials should be separated for recycling, give suggestions for those as well." +
         " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
         " Besides the nearest bin, a few alternatives should also be included in the response." +
-        " If formatting of the response is required, use HTML formatting instead of Markdown." +
         " Make the responses easy to read, with short sentences and paragraphs, and listing in points if possible.",
 });
 const makeChatPart = (msg) => {
@@ -84,7 +84,7 @@ const recognizeImage = (imageBase64_1, ...args_1) => __awaiter(void 0, [imageBas
             return {
                 name: "Demo Item",
                 canBeRecycled: true,
-                note: "This is a demo response because no Gemini API key is configured. Please add a valid API key."
+                note: "This is a demo response because no Gemini API key is configured. Please add a valid API key.",
             };
         }
         console.log("Recognizing image with Gemini Vision - image length:", imageBase64.length);
@@ -97,7 +97,8 @@ const recognizeImage = (imageBase64_1, ...args_1) => __awaiter(void 0, [imageBas
             type: "text",
             role: "user",
             content: "The following is a base64 encoded image of one or more items. Return in JSON format two pieces of information. 1) The generic name(s) of the item(s). 2) Whether this item can be recycled in Singapore, either true or false. The following is an example: " +
-                JSON.stringify(example) + ". IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or backticks."
+                JSON.stringify(example) +
+                ". IMPORTANT: Return ONLY valid JSON without any markdown formatting, code blocks, or backticks.",
         };
         const imagePrompt = {
             type: "image",
@@ -112,7 +113,7 @@ const recognizeImage = (imageBase64_1, ...args_1) => __awaiter(void 0, [imageBas
         try {
             // Check if the response is wrapped in markdown code block
             let jsonData;
-            if (typeof result === 'string' && result.includes('```')) {
+            if (typeof result === "string" && result.includes("```")) {
                 // Extract content between code blocks
                 const jsonMatch = result.match(/```(?:json)?\s*([\s\S]*?)```/);
                 if (jsonMatch && jsonMatch[1]) {
@@ -126,23 +127,23 @@ const recognizeImage = (imageBase64_1, ...args_1) => __awaiter(void 0, [imageBas
             }
             else {
                 // If not wrapped in code block, try direct parsing
-                jsonData = typeof result === 'string' ? JSON.parse(result) : result;
+                jsonData = typeof result === "string" ? JSON.parse(result) : result;
             }
             return jsonData;
         }
         catch (error) {
-            console.error('Error parsing Gemini response:', error);
+            console.error("Error parsing Gemini response:", error);
             return {
-                error: 'Failed to parse response from image recognition',
-                rawResponse: result
+                error: "Failed to parse response from image recognition",
+                rawResponse: result,
             };
         }
     }
     catch (error) {
         console.error("Error in recognizeImage:", error);
         return {
-            error: 'An unexpected error occurred during image recognition',
-            message: error instanceof Error ? error.message : String(error)
+            error: "An unexpected error occurred during image recognition",
+            message: error instanceof Error ? error.message : String(error),
         };
     }
 });
@@ -162,7 +163,7 @@ const callGemini = (msges) => __awaiter(void 0, void 0, void 0, function* () {
                 }
             }
             // Return a demo response that acknowledges the user's message
-            return `[DEMO MODE] I received your message: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}". ${getRandomDemoResponse()}`;
+            return `[DEMO MODE] I received your message: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? "..." : ""}". ${getRandomDemoResponse()}`;
         }
         // Log the incoming messages
         console.log(`Calling Gemini with ${msges.length} messages`);
