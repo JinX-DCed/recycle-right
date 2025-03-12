@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 
 const Navbar = styled.div`
-  background-color: #00a108;
+  background-color: #B9C9BF;
   color: white;
   padding: 16px;
   display: flex;
@@ -11,16 +11,16 @@ const Navbar = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-const HamburgerButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  &:focus {
-    outline: none;
-  }
-`;
+// const HamburgerButton = styled.button`
+//   background: none;
+//   border: none;
+//   color: white;
+//   font-size: 24px;
+//   cursor: pointer;
+//   &:focus {
+//     outline: none;
+//   }
+// `;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -55,31 +55,31 @@ const DropdownItem = styled.div`
 `;
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+	// const toggleDropdown = () => {
+	// 	setIsOpen(!isOpen);
+	// };
 
-  return (
-    <>
-      <Navbar>
-        <div>Recycle Right</div>
-        <div style={{ position: "relative" }}>
-          <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton>
-          {isOpen && (
-            <ModalOverlay onClick={() => setIsOpen(false)}>
-              <DropdownMenu onClick={(e) => e.stopPropagation()}>
-                <DropdownItem>Option 1</DropdownItem>
-                <DropdownItem>Option 2</DropdownItem>
-                <DropdownItem>Option 3</DropdownItem>
-              </DropdownMenu>
-            </ModalOverlay>
-          )}
-        </div>
-      </Navbar>
-    </>
-  );
+	return (
+		<>
+			<Navbar>
+				<div>HyperGreen</div>
+				<div style={{ position: "relative" }}>
+					{/* <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton> */}
+					{isOpen && (
+						<ModalOverlay onClick={() => setIsOpen(false)}>
+							<DropdownMenu onClick={(e) => e.stopPropagation()}>
+								<DropdownItem>Trashtalker</DropdownItem>
+								<DropdownItem>Log Recycling</DropdownItem>
+								<DropdownItem>Bin Map</DropdownItem>
+							</DropdownMenu>
+						</ModalOverlay>
+					)}
+				</div>
+			</Navbar>
+		</>
+	);
 };
 
 export default Header;
