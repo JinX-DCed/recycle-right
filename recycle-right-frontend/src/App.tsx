@@ -13,7 +13,7 @@ import LogRecycling from "./pages/logRecycling";
 import Modal from "./components/Modal";
 import BinMapPage from "./pages/BinMapPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComment, faPlus } from "@fortawesome/free-solid-svg-icons"; // Chat bubble icon
+import { faComment, faPlus } from "@fortawesome/free-solid-svg-icons";
 import ChatModal from "./components/ChatModal";
 import axios from "axios";
 import SubmitLogs from "./pages/SubmitLogs";
@@ -27,47 +27,67 @@ const Container = styled.div`
 `;
 
 const LRButton = styled.button`
-  background-color: #006647;
+  display: flex;
+  align-items: center;
+  background-color: #b9c9bf;
   color: white;
-  width: 100%;
-  padding: 12px;
+  padding: 30px;
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  font-size: 18px;
-  margin-bottom: 20px;
-  font-weight: 600;
-  transition: background-color 0.3s, transform 0.2s;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background-color: #25eb92;
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
+    background-color: #8df9c8;
   }
 `;
 
 const TTButton = styled.button`
-  background-color: #006647;
+  display: flex;
+  align-items: center;
+  background-color: #b9c9bf;
   color: white;
-  width: 100%;
-  padding: 12px;
+  padding: 30px;
+  border: none;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  transition: background-color 0.3s, transform 0.2s;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+  margin-bottom: 15px;
+  margin-top: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background-color: #25eb92;
-    transform: translateY(-2px);
+    background-color: #8df9c8;
   }
+`;
 
-  &:active {
-    transform: translateY(0);
-  }
+const IconContainer = styled.div`
+  flex: 0 0 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TextContainer = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10px;
+`;
+
+const Title = styled.span`
+  font-size: 18px;
+  font-weight: bold;
+`;
+
+const Caption = styled.span`
+  font-size: 12px;
+  color: #ffffff;
 `;
 
 // Create a custom axios instance with proper configuration
@@ -246,9 +266,10 @@ const App = () => {
       }, 2000);
     };
     return (
+      <>
+      <Header />
       <Container>
-        <Header />
-        <div
+        {/* <div
           style={{
             textAlign: "center",
             margin: "20px 0",
@@ -259,11 +280,20 @@ const App = () => {
         >
           Total Points: <span style={{ color: "#006647" }}>{totalPoints}</span>{" "}
           | Donovan
-        </div>
+        </div> */}
         <div className="p-4">
           <TTButton onClick={() => setIsChatOpen(true)}>
-            <FontAwesomeIcon icon={faComment} className="text-gray-700" />{" "}
-            Trashtalker
+            <IconContainer>
+            <img
+              src={require('./logo.png')}
+              alt="Uploaded"
+              style={{ maxWidth: "100%" }}
+            />
+            </IconContainer>
+            <TextContainer>
+              <Title>Trashtalker</Title>
+              <Caption>Your Personal Recycling Guru!</Caption>
+            </TextContainer>
           </TTButton>
           {/* <Link to="/logRecycling"> */}
           <LRButton>
@@ -274,17 +304,17 @@ const App = () => {
               style={{ display: "none" }}
               id="image-upload"
             />
-            <label
-              htmlFor="image-upload"
-              style={{
-                color: "white",
-                textDecoration: "none",
-                width: "100%",
-                display: "block",
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} className="text-gray-700" /> Log
-              Recycling
+            <label htmlFor="image-upload" style={{ width: "100%", display: "flex", alignItems: "center" }}>
+              <IconContainer>
+                <img
+                  src={require('./add-circled-outline.png')}
+                  alt="Uploaded"
+                  style={{ maxWidth: "100%" }}
+                />              
+              </IconContainer>
+              <TextContainer>
+                <Title>Log Recycling</Title>
+              </TextContainer>
             </label>
           </LRButton>
           {/* </Link> */}
@@ -294,6 +324,7 @@ const App = () => {
           <Navigation />
         </div>
       </Container>
+      </>
     );
   };
 

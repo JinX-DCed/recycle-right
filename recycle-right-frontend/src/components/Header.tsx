@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 
 const Navbar = styled.div`
-  background-color: #00a108;
+  background-color: #B9C9BF;
   color: white;
   padding: 16px;
   display: flex;
@@ -11,16 +11,16 @@ const Navbar = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-const HamburgerButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  &:focus {
-    outline: none;
-  }
-`;
+// const HamburgerButton = styled.button`
+//   background: none;
+//   border: none;
+//   color: white;
+//   font-size: 24px;
+//   cursor: pointer;
+//   &:focus {
+//     outline: none;
+//   }
+// `;
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -28,7 +28,7 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); // Semi-transparent background
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -64,9 +64,15 @@ const Header = () => {
   return (
     <>
       <Navbar>
-        <div>Recycle Right</div>
+        <div>
+          <img
+            src={require('./HyperGreen.png')}
+            alt="logo"
+            style={{ maxWidth: "60%" }}
+          />
+        </div>
         <div style={{ position: "relative" }}>
-          <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton>
+          {/* <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton> */}
           {isOpen && (
             <ModalOverlay onClick={() => setIsOpen(false)}>
               <DropdownMenu onClick={(e) => e.stopPropagation()}>
