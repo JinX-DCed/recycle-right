@@ -1,3 +1,7 @@
+#!/bin/bash
+
+# Update Navigation.tsx to add statistics navigation functionality
+cat > ./src/components/Navigation.tsx << 'EOL'
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBook, faMap, faChartBar } from '@fortawesome/free-solid-svg-icons';
@@ -81,3 +85,13 @@ const Navigation = () => {
 };
   
 export default Navigation;
+EOL
+
+# Update App.tsx to include the StatisticsPage route
+# First line (import)
+sed -i '' '1,20s/import SubmitLogs from "\.\/pages\/SubmitLogs";/import SubmitLogs from "\.\/pages\/SubmitLogs";\nimport StatisticsPage from "\.\/pages\/StatisticsPage";/' ./src/App.tsx
+
+# Add route
+sed -i '' 's/<Route path="\/submitLogs" element={<SubmitLogs \/>} \/>/<Route path="\/submitLogs" element={<SubmitLogs \/>} \/>\n          <Route path="\/statistics" element={<StatisticsPage \/>} \/>/' ./src/App.tsx
+
+echo "Updates completed!"

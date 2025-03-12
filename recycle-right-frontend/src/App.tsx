@@ -17,6 +17,7 @@ import { faComment, faPlus } from "@fortawesome/free-solid-svg-icons"; // Chat b
 import ChatModal from "./components/ChatModal";
 import axios from "axios";
 import SubmitLogs from "./pages/SubmitLogs";
+import StatisticsPage from "./pages/StatisticsPage";
 
 const Container = styled.div`
   max-width: 28rem;
@@ -316,6 +317,7 @@ const App = () => {
           <Route path="/binmap" element={<BinMapPage />} />
           <Route path="/logRecycling" element={<LogRecycling />} />
           <Route path="/submitLogs" element={<SubmitLogs />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
         </Routes>
 
       {/* Modal for displaying uploaded image and information */}
