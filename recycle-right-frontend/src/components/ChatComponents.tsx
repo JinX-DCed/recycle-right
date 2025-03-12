@@ -57,11 +57,10 @@ export const MessagesContainer = styled.div`
 `;
 
 export const MessageBubble = styled.div<{ isUser: boolean }>`
-  max-width: 80%;
+  max-width: 100%;
   padding: 12px 16px;
   border-radius: 18px;
   background-color: ${(props) => (props.isUser ? "#dcf8c6" : "#f0f0f0")};
-  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
   word-break: break-word;
 
   /* Markdown styling */
