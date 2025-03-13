@@ -183,6 +183,7 @@ export const QuickOptionsMenu = styled.div`
   display: grid;
   gap: 12px;
   z-index: 100;
+  bottom: 1rem;
 `;
 
 export const QuickOption = styled.button`
@@ -190,8 +191,7 @@ export const QuickOption = styled.button`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid #8390fa;
-  border-radius: 16px;
+  border: 0px;
   background-color: white;
   color: #8390fa;
   font-size: 14px;

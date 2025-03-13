@@ -128,10 +128,20 @@ export const recognizeImage = async (
     );
 
     // Create a specialized prompt for image recognition
-    const example = {
-      name: "Empty bottle",
-      canBeRecycled: true,
-    };
+    const example = [
+      {
+        name: "Empty bottle",
+        canBeRecycled: true,
+      },
+      {
+        name: "Paper",
+        canBeRecycled: true,
+      },
+      {
+        name: "Food container",
+        canBeRecycled: false,
+      },
+    ];
 
     const textPrompt: ChatMsg = {
       type: "text",

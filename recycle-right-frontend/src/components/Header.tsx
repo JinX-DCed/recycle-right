@@ -1,8 +1,11 @@
 import styled from "styled-components";
-import { useState } from "react";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { BackButton } from "./BackButton";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = styled.div`
-  background-color: #B9C9BF;
+  background-color: #b9c9bf;
   color: white;
   padding: 16px;
   display: flex;
@@ -11,76 +14,34 @@ const Navbar = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
-// const HamburgerButton = styled.button`
-//   background: none;
-//   border: none;
-//   color: white;
-//   font-size: 24px;
-//   cursor: pointer;
-//   &:focus {
-//     outline: none;
-//   }
-// `;
+export interface HeaderProps {
+  title?: string;
+}
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+const Header: React.FC<HeaderProps> = ({ title }) => {
+  const navigate = useNavigate();
 
-const DropdownMenu = styled.div`
-  background-color: white;
-  color: black;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-  border-radius: 8px;
-  padding: 16px;
-  width: 300px;
-`;
-
-const DropdownItem = styled.div`
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
-`;
-
-const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+  const handleBack = () => {
+    navigate("/");
   };
 
   return (
     <>
       <Navbar>
+        {window.location.pathname === "/" ? null : (
+          <BackButton onClick={handleBack}>
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </BackButton>
+        )}
         <div>
-          <img
-            src={require('./HyperGreen.png')}
-            alt="logo"
-            style={{ maxWidth: "60%" }}
-          />
-        </div>
-        <div style={{ position: "relative" }}>
-          {/* <HamburgerButton onClick={toggleDropdown}>&#9776;</HamburgerButton> */}
-          {isOpen && (
-            <ModalOverlay onClick={() => setIsOpen(false)}>
-              <DropdownMenu onClick={(e) => e.stopPropagation()}>
-                <DropdownItem>Option 1</DropdownItem>
-                <DropdownItem>Option 2</DropdownItem>
-                <DropdownItem>Option 3</DropdownItem>
-              </DropdownMenu>
-            </ModalOverlay>
+          {title ? (
+            title
+          ) : (
+            <img
+              src={require("./HyperGreen.png")}
+              alt="logo"
+              style={{ maxWidth: "60%" }}
+            />
           )}
         </div>
       </Navbar>
