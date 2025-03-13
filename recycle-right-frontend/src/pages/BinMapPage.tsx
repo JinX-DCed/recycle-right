@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { Coords } from "../components/ChatInterface";
 import { SESSION_STORAGE_NAMES } from "../components/constants";
+import { BackButton } from "../components/BackButton";
 
 const PageContainer = styled.div`
   position: fixed;
@@ -36,18 +37,6 @@ const Header = styled.div`
   align-items: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 100%;
-`;
-
-const BackButton = styled.button`
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  margin-right: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const Title = styled.h1`

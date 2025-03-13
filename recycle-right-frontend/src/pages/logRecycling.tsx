@@ -1,6 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCamera, faTrash, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCamera,
+  faTrash,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import Header from "../components/Header";
 import { RecycleRightContext } from "../App";
@@ -28,7 +32,7 @@ const ButtonContainer = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: #8390FA;
+  background-color: #8390fa;
   color: white;
   padding: 10px 16px;
   border: none;
@@ -56,184 +60,197 @@ const DeleteButton = styled(Button)`
 `;
 
 interface Item {
-	id: number;
-	name: string;
-	points: number;
-	recyclable: boolean;
-	error?: string;
-	imageUrl?: string | null;
+  id: number;
+  name: string;
+  points: number;
+  recyclable: boolean;
+  error?: string;
+  imageUrl?: string | null;
 }
 
 const LogRecycling = () => {
-	const [itemPoints, setItemPoints] = useState(0);
-	const [items, setItems] = useState<Item[]>([]);
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const navigate = useNavigate();
+  const [itemPoints, setItemPoints] = useState(0);
+  const [items, setItems] = useState<Item[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
-	// Get the context data
-	const { recognizedItem, updateTotalPoints } = useContext(RecycleRightContext);
-	
-	// Check if items length is 0 and navigate to home page
-	// useEffect(() => {
-	// 	if (items.length === 0) {
-	// 		navigate('/'); // Navigate to the home page
-	// 	}
-	// }, [setItems, navigate]); // Dependency array includes items and navigate
+  // Get the context data
+  const { recognizedItem, updateTotalPoints } = useContext(RecycleRightContext);
 
-	// Handle image upload for retaking photos
-	const handleRetakePhoto = () => {
-		if (fileInputRef.current) {
-			fileInputRef.current.click();
-		}
-	};
+  // Check if items length is 0 and navigate to home page
+  // useEffect(() => {
+  // 	if (items.length === 0) {
+  // 		navigate('/'); // Navigate to the home page
+  // 	}
+  // }, [setItems, navigate]); // Dependency array includes items and navigate
 
-	// Handle deleting an item
-	const handleDeleteItem = (id: number) => {
-		setItems(prevItems => prevItems.filter(item => item.id !== id));
-		setItemPoints(0);
-		console.log(items.length);
-		if (items.length === 0) {
-			navigate('/');
-		}
-	};
+  // Handle image upload for retaking photos
+  const handleRetakePhoto = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
-	// Handle submitting the log
-	const handleSubmitLog = () => {
-		// Add points to the user's total
-		updateTotalPoints(itemPoints);
-		
-		// Show success message
-		alert(`Success! Added ${itemPoints} points to your total.`);
-		
-		// Navigate back to the home page
-		navigate('/submitLogs');
-	};
-	
-	// Update items when recognized item changes
-	useEffect(() => {
-		if (recognizedItem && recognizedItem.name) {
-			// Create a new item based on the recognized data
-			const newItem: Item = {
-				id: Date.now(), // Use timestamp as unique ID
-				name: recognizedItem.name,
-				points: recognizedItem.canBeRecycled ? 10 : 0,
-				recyclable: recognizedItem.canBeRecycled,
-				imageUrl: recognizedItem.imageUrl
-			};
-			
-			// Add error message for non-recyclable items
-			if (!recognizedItem.canBeRecycled) {
-				newItem.error = "This item cannot be recycled. Please delete, or re-take the photo if item has been wrongly identified.";
-			}
-			
-			// Add the new item to the list
-			setItems([newItem]);
-			
-			// Update item points
-			setItemPoints(newItem.points);
-		} else if (items.length === 0) {
-			// If no recognized item and no items, show a default item
-			setItems([
-				{ 
-					id: 1, 
-					name: "No item recognized", 
-					points: 0, 
-					recyclable: false,
-					error: "No item was recognized. Please retake the photo or return to the home screen." 
-				}
-			]);
-		}
-	}, [recognizedItem]);
-	
-	const canSubmit = items.length !== 0;
+  // Handle deleting an item
+  const handleDeleteItem = (id: number) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setItemPoints(0);
+    console.log(items.length);
+    if (items.length === 0) {
+      navigate("/");
+    }
+  };
 
-	return (
-		<>
-		<Header />
+  // Handle submitting the log
+  const handleSubmitLog = () => {
+    // Add points to the user's total
+    updateTotalPoints(itemPoints);
 
-		<Container>
-			{/* Header */}
+    // Show success message
+    alert(`Success! Added ${itemPoints} points to your total.`);
 
-			{/* Items List */}
-			{items.map((item) => (
-				<Card key={item.id}>
-					<div className="flex justify-between items-center">
-						{/* Item Name with Icon */}
-						<div className="flex items-center gap-2">
-							{item.recyclable ? (
-								<FontAwesomeIcon icon={faCamera} className="text-gray-700" />
-							) : (
-								<FontAwesomeIcon icon={faExclamationCircle} className="text-red-500" />
-							)}
-							<h2 className={`font-semibold ${item.recyclable ? "text-gray-900" : "text-red-600"}`}>
-								{item.name}
-							</h2>
-						</div>
-						{/* Points Display */}
-						{item.recyclable && <span className="text-gray-500">{item.points}pts</span>}
-					</div>
+    // Navigate back to the home page
+    navigate("/submitLogs");
+  };
 
-					{/* Display Image if Available */}
-					{item.imageUrl && (
-						<div className="mt-2 mb-2">
-							<img 
-								src={item.imageUrl} 
-								alt={item.name} 
-								style={{ 
-									maxWidth: "100%", 
-									borderRadius: "8px",
-									border: item.recyclable ? "2px solid #00a108" : "2px solid #ff4d4d" 
-								}} 
-							/>
-						</div>
-					)}
+  // Update items when recognized item changes
+  useEffect(() => {
+    if (recognizedItem && recognizedItem.name) {
+      // Create a new item based on the recognized data
+      const newItem: Item = {
+        id: Date.now(), // Use timestamp as unique ID
+        name: recognizedItem.name,
+        points: recognizedItem.canBeRecycled ? 10 : 0,
+        recyclable: recognizedItem.canBeRecycled,
+        imageUrl: recognizedItem.imageUrl,
+      };
 
-					{/* Error Message for Non-Recyclable Items */}
-					{!item.recyclable && (
-						<p className="text-red-500 text-sm mt-1">{item.error}</p>
-					)}
+      // Add error message for non-recyclable items
+      if (!recognizedItem.canBeRecycled) {
+        newItem.error =
+          "This item cannot be recycled. Please delete, or re-take the photo if item has been wrongly identified.";
+      }
 
-					{/* Action Buttons */}
-					<div className="mt-3 flex gap-2">
-						<ButtonContainer>
-							<Button onClick={handleRetakePhoto}>
-								<FontAwesomeIcon icon={faCamera} /> Re-take Photo
-								<input
-									ref={fileInputRef}
-									type="file"
-									accept="image/*"
-									style={{ display: 'none' }}
-									// Use the same ID as in App.tsx to trigger the same flow
-									id="image-upload-retake"
-									onChange={() => navigate('/')}
-								/>
-							</Button>
-							<DeleteButton onClick={() => handleDeleteItem(item.id)}>
-								<FontAwesomeIcon icon={faTrash} /> Delete
-							</DeleteButton>
-						</ButtonContainer>
-					</div>
-				</Card>
-			))}
+      // Add the new item to the list
+      setItems([newItem]);
 
-			{/* Total Points */}
-			<Card className="flex justify-between items-center text-lg font-semibold">
-				<span>Total points: </span>
-				<span>{itemPoints}pts</span>
-			</Card>
+      // Update item points
+      setItemPoints(newItem.points);
+    } else if (items.length === 0) {
+      // If no recognized item and no items, show a default item
+      setItems([
+        {
+          id: 1,
+          name: "No item recognized",
+          points: 0,
+          recyclable: false,
+          error:
+            "No item was recognized. Please retake the photo or return to the home screen.",
+        },
+      ]);
+    }
+  }, [recognizedItem]);
 
-			{/* Submit Button */}
+  const canSubmit = items.length !== 0;
 
-			<Button 
-				className="mt-4" 
-				disabled={!canSubmit}
-				onClick={handleSubmitLog}
-			>
-				Submit Log
-			</Button>
-		</Container>
-		</>
-	);
+  return (
+    <>
+      <Header title="Log recycled item" />
+
+      <Container>
+        {/* Header */}
+
+        {/* Items List */}
+        {items.map((item) => (
+          <Card key={item.id}>
+            <div className="flex justify-between items-center">
+              {/* Item Name with Icon */}
+              <div className="flex items-center gap-2">
+                {item.recyclable ? (
+                  <FontAwesomeIcon icon={faCamera} className="text-gray-700" />
+                ) : (
+                  <FontAwesomeIcon
+                    icon={faExclamationCircle}
+                    className="text-red-500"
+                  />
+                )}
+                <h2
+                  className={`font-semibold ${
+                    item.recyclable ? "text-gray-900" : "text-red-600"
+                  }`}
+                >
+                  {item.name}
+                </h2>
+              </div>
+              {/* Points Display */}
+              {item.recyclable && (
+                <span className="text-gray-500">{item.points}pts</span>
+              )}
+            </div>
+
+            {/* Display Image if Available */}
+            {item.imageUrl && (
+              <div className="mt-2 mb-2">
+                <img
+                  src={item.imageUrl}
+                  alt={item.name}
+                  style={{
+                    maxWidth: "100%",
+                    borderRadius: "8px",
+                    border: item.recyclable
+                      ? "2px solid #00a108"
+                      : "2px solid #ff4d4d",
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Error Message for Non-Recyclable Items */}
+            {!item.recyclable && (
+              <p className="text-red-500 text-sm mt-1">{item.error}</p>
+            )}
+
+            {/* Action Buttons */}
+            <div className="mt-3 flex gap-2">
+              <ButtonContainer>
+                <Button onClick={handleRetakePhoto}>
+                  <FontAwesomeIcon icon={faCamera} /> Re-take Photo
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    // Use the same ID as in App.tsx to trigger the same flow
+                    id="image-upload-retake"
+                    onChange={() => navigate("/")}
+                  />
+                </Button>
+                <DeleteButton onClick={() => handleDeleteItem(item.id)}>
+                  <FontAwesomeIcon icon={faTrash} /> Delete
+                </DeleteButton>
+              </ButtonContainer>
+            </div>
+          </Card>
+        ))}
+
+        {/* Total Points */}
+        <Card className="flex justify-between items-center text-lg font-semibold">
+          <span>Total points: </span>
+          <span>{itemPoints}pts</span>
+        </Card>
+
+        {/* Submit Button */}
+
+        <Button
+          className="mt-4"
+          disabled={!canSubmit}
+          onClick={handleSubmitLog}
+        >
+          Submit Log
+        </Button>
+      </Container>
+    </>
+  );
 };
 
 export default LogRecycling;

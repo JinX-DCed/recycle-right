@@ -518,6 +518,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   };
 
   const handleQuickOptionsLocationTap = async () => {
+    setShowMenu(false);
+    setShowQuickOptions(false);
     const location = await getCurrentLocation();
     if (location) {
       const userMessage: ChatMessage = {
@@ -532,7 +534,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
 
       sendMessage(userMessage);
     }
-    setShowQuickOptions(false);
   };
 
   return (
