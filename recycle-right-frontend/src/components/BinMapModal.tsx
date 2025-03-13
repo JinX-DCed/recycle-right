@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import BinMap from './BinMap';
+import { RecycleRightContext } from '../App';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -47,6 +48,9 @@ interface BinMapModalProps {
 }
 
 const BinMapModal: React.FC<BinMapModalProps> = ({ isOpen, onClose }) => {
+  // Access the mapboxToken from context
+  const { mapboxToken } = useContext(RecycleRightContext);
+  
   if (!isOpen) return null;
 
   return (
@@ -55,7 +59,7 @@ const BinMapModal: React.FC<BinMapModalProps> = ({ isOpen, onClose }) => {
         <ModalHeader>
           <Title>Recycling Bins in Singapore</Title>
         </ModalHeader>
-        <BinMap onClose={onClose} />
+        <BinMap onClose={onClose} mapboxToken={mapboxToken} />
       </ModalContent>
     </ModalOverlay>
   );

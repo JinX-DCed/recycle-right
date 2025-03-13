@@ -53,8 +53,10 @@ const model = genAI.getGenerativeModel({
     systemInstruction: "You will be talking about recycling in Singapore." +
         " If you are asked to identify items, there might be multiple items in the image, try to identify them all." +
         " If it looks like the item is made of different materials and those materials should be separated for recycling, give suggestions for those as well." +
-        " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
-        " Besides the nearest bin, a few alternatives should also be included in the response." +
+        // " If there is a question asking for the nearest recycling bin, include HTML anchor tags that links to Google Maps that opens to the location of the nearest bin in the response, and the anchor text will be 'here.'" +
+        // " Besides the nearest bin, a few alternatives should also be included in the response." +
+        "If a location is shared without context, assume that it is asking for the nearest recycling bins." +
+        " If there is a question asking for the nearest recycling bin, call the getNearestBin function." +
         " Make the responses easy to read, with short sentences and paragraphs, and listing in points if possible.",
 });
 const makeChatPart = (msg) => {
@@ -211,17 +213,24 @@ const callGemini = (msges) => __awaiter(void 0, void 0, void 0, function* () {
                         return `The AI attempted to use a function that isn't available. Please try a different question.`;
                     }
                     const funcCallResult = tools[call.name](call.args);
-                    const result2 = yield chat.sendMessage([
-                        {
-                            functionResponse: {
-                                name: "getNearestBin",
-                                response: {
-                                    content: JSON.stringify(funcCallResult),
+                    if (call.name === "getNearestBin") {
+                        return JSON.stringify({
+                            locations: funcCallResult,
+                        });
+                    }
+                    else {
+                        const result2 = yield chat.sendMessage([
+                            {
+                                functionResponse: {
+                                    name: call.name,
+                                    response: {
+                                        content: JSON.stringify(funcCallResult),
+                                    },
                                 },
                             },
-                        },
-                    ]);
-                    return result2.response.text();
+                        ]);
+                        return result2.response.text();
+                    }
                 }
             }
             catch (functionError) {

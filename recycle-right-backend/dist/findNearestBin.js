@@ -43,7 +43,7 @@ const getNearestBinCoordinates = (currentLongitude, currentLatitude) => {
         longitude: coord.coordinates.longitude,
         latitude: coord.coordinates.latitude,
         distance: coord.distance,
-        googleMapLink: `https://www.google.com/maps/search/?api=1&query=${coord.coordinates.latitude},${coord.coordinates.longitude}`,
+        // googleMapLink: `https://www.google.com/maps/search/?api=1&query=${coord.coordinates.latitude},${coord.coordinates.longitude}`,
     }));
     return result;
 };

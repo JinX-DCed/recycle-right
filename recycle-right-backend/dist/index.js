@@ -22,6 +22,8 @@ const gemini_1 = require("./gemini");
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3001;
+// Create an API router for better organization
+const apiRouter = express_1.default.Router();
 // Enable CORS for all routes - use a more permissive configuration for development
 app.use((0, cors_1.default)());
 // Add preflight OPTIONS handling for all routes
@@ -36,11 +38,26 @@ app.use((req, res, next) => {
 app.use(express_1.default.json({ limit: "50mb" }));
 // For URL-encoded form data (supports the extended option)
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
-app.get("/health", (req, res) => {
+app.get("/health", ((req, res) => {
     console.log("ALIVE");
     res.send("ALIVE");
-});
-app.post("/gemini", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+}));
+// Define API routes on the router
+// Added endpoint to retrieve Mapbox token
+apiRouter.get("/mapbox-token", ((req, res) => {
+    // Get mapbox token from environment
+    const mapboxToken = process.env.MAPBOX_TOKEN;
+    if (!mapboxToken) {
+        console.error("Mapbox token is not defined in environment variables");
+        return res.status(404).json({
+            error: "Mapbox token is not configured on the server"
+        });
+    }
+    res.json({ token: mapboxToken });
+}));
+// Mount the API router at /api
+app.use("/api", apiRouter);
+app.post("/gemini", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Log the entire request body for debugging
         console.log('Request body:', JSON.stringify(req.body));
@@ -69,8 +86,8 @@ app.post("/gemini", (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             message: error instanceof Error ? error.message : String(error)
         });
     }
-}));
-app.post("/image/recognise", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+})));
+app.post("/image/recognise", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { image } = req.body;
         // Validate the image input
@@ -117,19 +134,19 @@ app.post("/image/recognise", (req, res) => __awaiter(void 0, void 0, void 0, fun
             message: error instanceof Error ? error.message : String(error)
         });
     }
-}));
+})));
 // app.post("/bin/nearest", (req, res) => {
 //   const { latitude, longitude } = req.body;
 //   const result = getNearestBinCoordinates(longitude, latitude);
 //   res.send(result);
 // });
-app.use((req, res) => {
+app.use(((req, res) => {
     // Handle 404 - Route not found
     res.status(404).json({
         error: "Not Found",
         message: `The requested endpoint ${req.method} ${req.path} does not exist`
     });
-});
+}));
 // Global error handler
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
@@ -143,4 +160,5 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Backend server running on port ${port}`);
     console.log(`Gemini API Key ${process.env.GEMINI_API_KEY ? 'is configured' : 'is NOT configured - check your environment variables!'}`);
+    console.log(`Mapbox Token ${process.env.MAPBOX_TOKEN ? 'is configured' : 'is NOT configured - check your environment variables!'}`);
 });

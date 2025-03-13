@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import styled from "styled-components";
 import BinMap from "../components/BinMap";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { Coords } from "../components/ChatInterface";
 import { SESSION_STORAGE_NAMES } from "../components/constants";
+import { RecycleRightContext } from "../App";
 
 const PageContainer = styled.div`
   position: fixed;
@@ -67,6 +68,7 @@ const BinMapPage: React.FC = () => {
   const [destinationLocation, setDestinationLocation] = useState<Coords | null>(
     null
   );
+  const { mapboxToken } = useContext(RecycleRightContext);
 
   useEffect(() => {
     // Check if there's a directed location in session storage
@@ -108,6 +110,7 @@ const BinMapPage: React.FC = () => {
             onClose={handleBack}
             currentLocation={currentLocation}
             destinationLocation={destinationLocation}
+            mapboxToken={mapboxToken}
           />
         </MapContainer>
       </ContentWrapper>

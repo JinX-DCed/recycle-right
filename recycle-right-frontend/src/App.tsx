@@ -8,7 +8,7 @@ import Header from "./components/Header";
 import Activity from "./components/Activity";
 import Navigation from "./components/Navigation";
 import styled from "styled-components";
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import LogRecycling from "./pages/logRecycling";
 import Modal from "./components/Modal";
 import BinMapPage from "./pages/BinMapPage";
@@ -115,12 +115,14 @@ interface RecognizedItemData {
 interface RecycleRightContextType {
   recognizedItem: RecognizedItemData | null;
   updateTotalPoints: (points: number) => void;
+  mapboxToken: string | null;
 }
 
 // Create a context for sharing recognized item data and functions across components
 export const RecycleRightContext = createContext<RecycleRightContextType>({
   recognizedItem: null,
-  updateTotalPoints: () => {}
+  updateTotalPoints: () => {},
+  mapboxToken: null
 });
 
 const App = () => {
@@ -131,6 +133,31 @@ const App = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recognizedItem, setRecognizedItem] = useState<RecognizedItemData | null>(null);
+  const [mapboxToken, setMapboxToken] = useState<string | null>(null);
+
+  // Function to fetch Mapbox token from backend
+  const fetchMapboxToken = async () => {
+    try {
+      // Use the same API_BASE_URL that's used for other API calls
+      console.log('Fetching Mapbox token from backend');
+      const response = await api.get('/api/mapbox-token');
+      console.log('Mapbox token fetched successfully');
+      return response.data.token;
+    } catch (error) {
+      console.error('Error fetching Mapbox token:', error);
+      // Return fallback token if fetch fails
+      return "pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg";
+    }
+  };
+
+  // Fetch Mapbox token on app initialization
+  useEffect(() => {
+    const getMapboxToken = async () => {
+      const token = await fetchMapboxToken();
+      setMapboxToken(token);
+    };
+    getMapboxToken();
+  }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -337,7 +364,8 @@ const App = () => {
   // Context value
   const contextValue = {
     recognizedItem,
-    updateTotalPoints
+    updateTotalPoints,
+    mapboxToken
   };
 
   return (

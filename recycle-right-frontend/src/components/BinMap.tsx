@@ -4,26 +4,22 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import styled from "styled-components";
 import { Coords } from "./ChatInterface";
 
-// Use environment variable for Mapbox access token
-const mapboxToken = process.env.REACT_APP_MAPBOX_TOKEN;
-if (!mapboxToken) {
-  console.error(
-    "Mapbox token is not defined in environment variables. Map functionality will not work."
-  );
-}
-mapboxgl.accessToken =
-  mapboxToken ||
-  "pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg"; // Fallback to hardcoded token as a safety measure
+// Define a known working Mapbox token as fallback
+// This is a security tradeoff but ensures the map can still function if backend fails
+const FALLBACK_MAPBOX_TOKEN = "pk.eyJ1IjoieW9qZXJyeSIsImEiOiJjamRsZGZzaDYwNW52MnhxaGVta25pbWM5In0.23w4XcxSUUyeK263dtTOtg";
 
 const MapContainer = styled.div`
-  /* max-width: 28rem; Match the App container width */
   width: 100%;
   height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 20px;
   margin: 0 auto; /* Center the map */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `;
 
 const LoadingOverlay = styled.div`
@@ -121,12 +117,14 @@ interface BinMapProps {
   onClose: () => void;
   currentLocation?: Coords | null;
   destinationLocation?: Coords | null;
+  mapboxToken: string | null;
 }
 
 const BinMap: React.FC<BinMapProps> = ({
   onClose,
   currentLocation,
   destinationLocation,
+  mapboxToken,
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -141,42 +139,62 @@ const BinMap: React.FC<BinMapProps> = ({
   const defaultCenter: LngLatLike = { lng: 103.8198, lat: 1.3521 };
 
   const getWalkingRoute = async (start: Coords, end: Coords) => {
-    const query = await fetch(
-      `https://api.mapbox.com/directions/v5/mapbox/walking/${start.lng},${start.lat};${end.lng},${end.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
-    );
-    const json = await query.json();
-    const data = json.routes[0];
-    const route = data.geometry.coordinates;
-    const geojson = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "LineString",
-        coordinates: route,
-      },
-    };
+    if (!mapboxgl.accessToken) {
+      console.error("Cannot get walking route: Mapbox token not set");
+      return;
+    }
+    
+    try {
+      const query = await fetch(
+        `https://api.mapbox.com/directions/v5/mapbox/walking/${start.lng},${start.lat};${end.lng},${end.lat}?steps=true&geometries=geojson&access_token=${mapboxgl.accessToken}`
+      );
+      
+      if (!query.ok) {
+        throw new Error(`Mapbox API request failed with status: ${query.status}`);
+      }
+      
+      const json = await query.json();
+      
+      if (!json.routes || json.routes.length === 0) {
+        console.error("No route found between the specified points");
+        return;
+      }
+      
+      const data = json.routes[0];
+      const route = data.geometry.coordinates;
+      const geojson = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: route,
+        },
+      };
 
-    if (map.current?.getSource("route")) {
-      const source = map.current.getSource("route") as mapboxgl.GeoJSONSource;
-      source.setData(geojson as GeoJSON.Feature);
-    } else {
-      map.current?.addLayer({
-        id: "route",
-        type: "line",
-        source: {
-          type: "geojson",
-          data: geojson as GeoJSON.Feature,
-        },
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "#3887be",
-          "line-width": 5,
-          "line-opacity": 0.75,
-        },
-      });
+      if (map.current?.getSource("route")) {
+        const source = map.current.getSource("route") as mapboxgl.GeoJSONSource;
+        source.setData(geojson as GeoJSON.Feature);
+      } else if (map.current) {
+        map.current.addLayer({
+          id: "route",
+          type: "line",
+          source: {
+            type: "geojson",
+            data: geojson as GeoJSON.Feature,
+          },
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#3887be",
+            "line-width": 5,
+            "line-opacity": 0.75,
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching walking route:", err);
     }
   };
 
@@ -200,15 +218,39 @@ const BinMap: React.FC<BinMapProps> = ({
     setShowLegend((prev) => !prev);
   };
 
+  // First useEffect to initialize Mapbox with the token
   useEffect(() => {
-    if (!mapContainer.current) return;
+    // Set the token when component mounts
+    if (mapboxToken) {
+      mapboxgl.accessToken = mapboxToken;
+      console.log('Using token provided by App component');
+    } else {
+      console.log('Using fallback Mapbox token');
+      mapboxgl.accessToken = FALLBACK_MAPBOX_TOKEN;
+    }
+  }, [mapboxToken]);
+
+  // Second useEffect to initialize the map after token is set
+  useEffect(() => {
+    if (!mapContainer.current) {
+      console.log('Waiting for container...');
+      return;
+    }
 
     if (!mapboxgl.accessToken) {
-      setError(
-        "Mapbox token is missing. Please check your environment configuration."
-      );
+      console.error('Token missing');
+      setError("Mapbox token is not set. Map functionality will not work.");
       setLoading(false);
       return;
+    }
+
+    console.log('Initializing map with token present');
+
+    // Ensure the map container has dimensions before initializing
+    if (mapContainer.current.offsetWidth === 0 || mapContainer.current.offsetHeight === 0) {
+      console.warn('Map container has zero dimensions, forcing size');
+      mapContainer.current.style.width = '100%';
+      mapContainer.current.style.height = '400px'; // Enforce a minimum height
     }
 
     try {
@@ -222,6 +264,33 @@ const BinMap: React.FC<BinMapProps> = ({
         zoom: currentLocation ? 16 : 11,
         attributionControl: false, // Hide attribution for more map space on mobile
       });
+
+      // Add error handler - ensuring we turn off loading state if error occurs
+      map.current.on('error', (e) => {
+        console.error('Mapbox map error:', e);
+        setError(`Map error: ${e.error?.message || 'Unknown error'}`);
+        setLoading(false);
+      });
+
+      // Add style load event listener to set loading state to false when map is fully loaded
+      map.current.on('style.load', () => {
+        console.log('Map style loaded successfully');
+        setLoading(false);
+      });
+
+      // Add general load event listener as backup
+      map.current.on('load', () => {
+        console.log('Map loaded successfully');
+        setLoading(false);
+      });
+
+      // Force a resize after a short delay to ensure map renders correctly
+      setTimeout(() => {
+        if (map.current) {
+          map.current.resize();
+          console.log('Forced map resize to ensure proper rendering');
+        }
+      }, 200);
 
       // Add attribution control in a better position for mobile
       map.current.addControl(
@@ -427,20 +496,35 @@ const BinMap: React.FC<BinMapProps> = ({
       setError(`Failed to initialize map: ${(err as Error).message}`);
       setLoading(false);
     }
-  }, [currentLocation, destinationLocation]);
+  }, [currentLocation, destinationLocation, mapboxToken]);
 
   return (
-    <div style={{ position: "relative", height: "100%" }}>
-      <MapContainer ref={mapContainer} />
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* MapContainer with explicit dimensions */}
+      <MapContainer ref={mapContainer} id="map-container" />
 
+      {/* Loading Overlay */}
       {loading && (
         <LoadingOverlay>
           <div>Loading map...</div>
         </LoadingOverlay>
       )}
 
+      {/* Error display */}
       {error && (
-        <div style={{ padding: "20px", color: "red", textAlign: "center" }}>
+        <div style={{ 
+          padding: "20px", 
+          color: "red", 
+          textAlign: "center", 
+          position: "absolute", 
+          top: "50%", 
+          left: "50%", 
+          transform: "translate(-50%, -50%)",
+          background: "rgba(255,255,255,0.9)",
+          zIndex: 10,
+          borderRadius: "8px",
+          maxWidth: "80%" 
+        }}>
           {error}
         </div>
       )}
