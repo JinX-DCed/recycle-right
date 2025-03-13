@@ -546,7 +546,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       ) : (
         <MessagesContainer>
           {messages.map((message, index) => (
-            <div key={index}>
+            <div key={index} style={{ alignSelf: message.role === "user" ? "flex-start" : "flex-end", maxWidth: "80%" }}>
               <MessageBubble isUser={message.role === "user"}>
                 {message.type === "text" ? (
                   <Markdown

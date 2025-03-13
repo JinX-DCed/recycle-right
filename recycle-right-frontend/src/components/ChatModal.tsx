@@ -33,7 +33,7 @@ const ModalContent = styled.div`
 
 const ModalHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 16px;
   background-color: #B9C9BF;
@@ -43,6 +43,7 @@ const ModalHeader = styled.div`
 const Title = styled.h2`
   font-size: 1.25rem;
   margin: 0;
+  padding: 8px;
 `;
 
 const CloseButton = styled.button`
@@ -69,6 +70,13 @@ const BackButton = styled.div`
   padding: 10px 15px;
   cursor: pointer;
   transition: background-color 0.3s;
+`;
+  
+const IconContainer = styled.div`
+  flex: 0 0 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 interface ChatModalProps {

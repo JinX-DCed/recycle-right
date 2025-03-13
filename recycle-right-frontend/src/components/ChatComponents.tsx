@@ -38,7 +38,7 @@ export const MenuButton = styled.button`
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   width: 100%;
   height: 150px;
   text-align: center;
@@ -58,11 +58,10 @@ export const MessagesContainer = styled.div`
 `;
 
 export const MessageBubble = styled.div<{ isUser: boolean }>`
-  max-width: 80%;
+  max-width: 100%;
   padding: 12px 16px;
   border-radius: 18px;
   background-color: ${(props) => (props.isUser ? "#dcf8c6" : "#f0f0f0")};
-  align-self: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
   word-break: break-word;
 
   /* Markdown styling */
@@ -187,7 +186,7 @@ export const QuickOption = styled.button`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #8390FA;
   border-radius: 16px;
   background-color: white;
   color: #8390FA;
