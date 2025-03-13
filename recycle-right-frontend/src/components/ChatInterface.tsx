@@ -24,9 +24,6 @@ import {
   MessagesContainer,
   MessageBubble,
   ImageMessage,
-  LocationCard,
-  LocationHeader,
-  LocationContent,
   LocationButton,
   InputContainer,
   ImageButton,
@@ -36,6 +33,7 @@ import {
   QuickOptionsMenu,
   QuickOption,
 } from "./ChatComponents";
+import { SESSION_STORAGE_NAMES } from "./constants";
 
 // Types as specified in the requirements
 type ChatMsges = ChatMessage[];
@@ -51,6 +49,11 @@ type ChatMessage = {
     lng: number;
     name?: string;
   }; // Optional location data
+};
+
+export type Coords = {
+  lat: number;
+  lng: number;
 };
 
 // Sample initial message
@@ -122,14 +125,38 @@ const makeChatMsg = (
   content: string,
   role: "model" | "user",
   type: "text" | "image",
-  mimeType?: string
+  mimeType?: string,
+  location?: {
+    lat: number;
+    lng: number;
+    name?: string;
+  }
 ): ChatMessage => {
   return {
     type,
     role,
     content,
     mimeType,
+    location,
   };
+};
+
+const setLocationInSessionStorage = (name: string, location: Coords) => {
+  const currentLocations = sessionStorage.getItem(
+    SESSION_STORAGE_NAMES.OVERALL
+  );
+  if (currentLocations) {
+    const sessionLocation = JSON.parse(currentLocations);
+    sessionStorage.setItem(
+      SESSION_STORAGE_NAMES.OVERALL,
+      JSON.stringify({ ...sessionLocation, [name]: location })
+    );
+  } else {
+    sessionStorage.setItem(
+      SESSION_STORAGE_NAMES.OVERALL,
+      JSON.stringify({ [name]: location })
+    );
+  }
 };
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
@@ -153,36 +180,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Function to detect location in message
-  const detectLocation = (
-    message: string
-  ): { lat: number; lng: number; name?: string } | null => {
-    // Regular expression to match latitude,longitude patterns
-    // This regex looks for patterns like "1.3521, 103.8198" or variations
-    const latLngRegex = /(\-?\d+\.\d+),\s*(\-?\d+\.\d+)/;
-    const match = message.match(latLngRegex);
-
-    if (match && match.length >= 3) {
-      const lat = parseFloat(match[1]);
-      const lng = parseFloat(match[2]);
-
-      // Simple validation for Singapore area
-      if (lat >= 1.1 && lat <= 1.5 && lng >= 103.5 && lng <= 104.1) {
-        // Try to extract a name from the message if it exists
-        const nameRegex =
-          /(at|near|in|to)\s+([A-Za-z\s]+)(?=[\.,]|\s+at|\s+near|\s+with|\s+is|\s+has|$)/i;
-        const nameMatch = message.match(nameRegex);
-        const name = nameMatch ? nameMatch[2].trim() : "This location";
-
-        return { lat, lng, name };
-      }
-    }
-
-    return null;
-  };
-
   // Callback to get user's current location in terms of longitude and latitude
-  const getCurrentLocation = (): Promise<{ lat: number; lng: number }> => {
+  const getCurrentLocation = (): Promise<Coords> => {
     setIsLoading(true);
 
     return new Promise((resolve, reject) => {
@@ -221,15 +220,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     });
   };
 
-  const handleDirectToLocation = (location: { lat: number; lng: number }) => {
+  const handleDirectToLocation = (destinationLocation: Coords) => {
     // Store the location in sessionStorage to pass to the map component
-    sessionStorage.setItem("directedLocation", JSON.stringify(location));
+    setLocationInSessionStorage(
+      SESSION_STORAGE_NAMES.DESTINATION_LOCATION,
+      destinationLocation
+    );
     // Close the chat
     onClose();
     // Navigate to the bin map page or open the bin map modal
-    // For now, we'll simulate this by logging
-    console.log("Directing to location:", location);
-
     // This would typically navigate to your map page:
     navigate("/binmap");
   };
@@ -291,19 +290,34 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       // Parse the response from the backend
       const botResponseText = response.data.nextMsg;
       console.log("Response", response);
+
+      try {
+        const locationsObj = JSON.parse(botResponseText);
+        if (locationsObj.locations) {
+          const nearestBin = locationsObj.locations[0];
+          const resMsg = makeChatMsg(
+            `The nearest recycling bin to you is ${nearestBin.distance}m away. Tap the button to see it on the map!`,
+            "model",
+            "text",
+            undefined,
+            { lat: nearestBin.latitude, lng: nearestBin.longitude }
+          );
+          setMessages((prev) => [...prev, resMsg]);
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        console.log(
+          "Response is not a JSON, continuing to make chat message..."
+        );
+      }
+
       // Create the bot response message
       let botResponse: ChatMessage = {
         type: "text" as const,
         role: "model" as const,
         content: botResponseText,
       };
-
-      // Check if the response potentially contains location information
-      // This is a basic attempt - in a production app you might want the backend to explicitly return location data
-      const possibleLocationData = detectLocation(botResponseText);
-      if (possibleLocationData) {
-        botResponse.location = possibleLocationData;
-      }
 
       setMessages((prev) => [...prev, botResponse]);
       setIsLoading(false);
@@ -364,12 +378,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       role: "user" as const,
       content: inputText,
     };
-
-    // Check if the message contains a location
-    const locationData = detectLocation(inputText);
-    if (locationData) {
-      userMessage.location = locationData;
-    }
 
     sendMessage(userMessage);
   };
@@ -516,8 +524,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         type: "text",
         role: "user",
         content: `I'm at these coordinates: latitude is ${location.lat}, longitude is ${location.lng}`,
-        location,
       };
+      setLocationInSessionStorage(
+        SESSION_STORAGE_NAMES.CURRENT_LOCATION,
+        location
+      );
+
       sendMessage(userMessage);
     }
     setShowQuickOptions(false);
@@ -546,7 +558,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       ) : (
         <MessagesContainer>
           {messages.map((message, index) => (
-            <div key={index} style={{ alignSelf: message.role === "user" ? "flex-start" : "flex-end", maxWidth: "80%" }}>
+            <div
+              key={index}
+              style={{
+                alignSelf: message.role === "user" ? "flex-start" : "flex-end",
+                maxWidth: "80%",
+              }}
+            >
               <MessageBubble isUser={message.role === "user"}>
                 {message.type === "text" ? (
                   <Markdown
@@ -561,27 +579,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
                     alt="User uploaded image"
                   />
                 )}
+                {message.location && (
+                  <LocationButton
+                    onClick={() => handleDirectToLocation(message.location!)}
+                  >
+                    <FontAwesomeIcon icon={faDirections} />
+                    Get Directions
+                  </LocationButton>
+                )}
               </MessageBubble>
-
-              {/* Location card if message has location */}
-              {message.location && (
-                <LocationCard>
-                  <LocationHeader>
-                    <FontAwesomeIcon icon={faMapMarkerAlt} />
-                    {message.location.name || "Location Found"}
-                  </LocationHeader>
-                  <LocationContent>
-                    <div>Latitude: {message.location.lat.toFixed(6)}</div>
-                    <div>Longitude: {message.location.lng.toFixed(6)}</div>
-                    <LocationButton
-                      onClick={() => handleDirectToLocation(message.location!)}
-                    >
-                      <FontAwesomeIcon icon={faDirections} />
-                      Get Directions
-                    </LocationButton>
-                  </LocationContent>
-                </LocationCard>
-              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -600,7 +606,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       ) : null}
 
       <InputContainer>
-        <ImageButton onClick={() => setShowQuickOptions(true)}>
+        <ImageButton onClick={() => setShowQuickOptions(!showQuickOptions)}>
           <FontAwesomeIcon icon={faCirclePlus} />
         </ImageButton>
         <FileInput

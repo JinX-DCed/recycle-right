@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import BinMap from '../components/BinMap';
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import BinMap from "../components/BinMap";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { Coords } from "../components/ChatInterface";
+import { SESSION_STORAGE_NAMES } from "../components/constants";
 
 const PageContainer = styled.div`
   position: fixed;
@@ -27,7 +29,7 @@ const ContentWrapper = styled.div`
 `;
 
 const Header = styled.div`
-  background-color: #8390FA;
+  background-color: #8390fa;
   color: white;
   padding: 16px;
   display: flex;
@@ -61,27 +63,37 @@ const MapContainer = styled.div`
 
 const BinMapPage: React.FC = () => {
   const navigate = useNavigate();
-  const [directedLocation, setDirectedLocation] = useState<{lat: number, lng: number} | null>(null);
-  
+  const [currentLocation, setCurrentLocation] = useState<Coords | null>(null);
+  const [destinationLocation, setDestinationLocation] = useState<Coords | null>(
+    null
+  );
+
   useEffect(() => {
     // Check if there's a directed location in session storage
-    const locationData = sessionStorage.getItem('directedLocation');
+    const locationData = sessionStorage.getItem(SESSION_STORAGE_NAMES.OVERALL);
     if (locationData) {
       try {
         const parsedLocation = JSON.parse(locationData);
-        setDirectedLocation(parsedLocation);
+        if (parsedLocation.currentLocation) {
+          setCurrentLocation(parsedLocation.currentLocation);
+        }
+
+        if (parsedLocation.destinationLocation) {
+          setDestinationLocation(parsedLocation.destinationLocation);
+        }
+
         // Clear the session storage after retrieving the location
-        sessionStorage.removeItem('directedLocation');
+        sessionStorage.removeItem(SESSION_STORAGE_NAMES.OVERALL);
       } catch (error) {
-        console.error('Error parsing location data:', error);
+        console.error("Error parsing location data:", error);
       }
     }
   }, []);
-  
+
   const handleBack = () => {
-    navigate('/');
+    navigate("/");
   };
-  
+
   return (
     <PageContainer>
       <ContentWrapper>
@@ -92,9 +104,10 @@ const BinMapPage: React.FC = () => {
           <Title>Recycling Bins Map</Title>
         </Header>
         <MapContainer>
-          <BinMap 
-            onClose={handleBack} 
-            directedLocation={directedLocation}
+          <BinMap
+            onClose={handleBack}
+            currentLocation={currentLocation}
+            destinationLocation={destinationLocation}
           />
         </MapContainer>
       </ContentWrapper>

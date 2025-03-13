@@ -31,8 +31,8 @@ export const ButtonGrid = styled.div`
 
 export const MenuButton = styled.button`
   background-color: #fffef7;
-  color: #8390FA;
-  border: solid #8390FA 2px;
+  color: #8390fa;
+  border: solid #8390fa 2px;
   border-radius: 12px;
   padding: 16px;
   font-size: 16px;
@@ -44,7 +44,7 @@ export const MenuButton = styled.button`
   text-align: center;
 
   &:hover {
-    background-color: #8390FA;
+    background-color: #8390fa;
   }
 `;
 
@@ -109,7 +109,7 @@ export const MessageBubble = styled.div<{ isUser: boolean }>`
   }
 
   & a {
-    color: #8390FA;
+    color: #8390fa;
     text-decoration: none;
     &:hover {
       text-decoration: underline;
@@ -138,7 +138,7 @@ export const LocationCard = styled.div`
 `;
 
 export const LocationHeader = styled.div`
-  background-color: #8390FA;
+  background-color: #8390fa;
   color: white;
   padding: 10px 16px;
   font-weight: 500;
@@ -152,7 +152,7 @@ export const LocationContent = styled.div`
 `;
 
 export const LocationButton = styled.button`
-  background-color: #8390FA;
+  background-color: #8390fa;
   color: white;
   border: none;
   border-radius: 24px;
@@ -173,12 +173,16 @@ export const LocationButton = styled.button`
 
 // Small menu above input that contains a list of options for the user to select from, each option has an icon and a label
 export const QuickOptionsMenu = styled.div`
-  display: flex;
-  gap: 8px;
-  padding: 8px 12px;
-  overflow-x: auto;
-  background-color: #f8f8f8;
-  border-top: 1px solid #e0e0e0;
+  position: relative;
+  width: 40%;
+  left: 1rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  z-index: 100;
 `;
 
 export const QuickOption = styled.button`
@@ -186,10 +190,10 @@ export const QuickOption = styled.button`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid #8390FA;
+  border: 1px solid #8390fa;
   border-radius: 16px;
   background-color: white;
-  color: #8390FA;
+  color: #8390fa;
   font-size: 14px;
   white-space: nowrap;
   cursor: pointer;
@@ -221,12 +225,12 @@ export const MessageInput = styled.input`
   font-size: 16px;
 
   &:focus {
-    border-color: #8390FA;
+    border-color: #8390fa;
   }
 `;
 
 export const SendButton = styled.button`
-  background: #8390FA;
+  background: #8390fa;
   color: white;
   border: none;
   border-radius: 50%;
@@ -247,7 +251,7 @@ export const SendButton = styled.button`
 export const ImageButton = styled.button`
   background: none;
   border: none;
-  color: #8390FA;
+  color: #8390fa;
   margin-right: 8px;
   display: flex;
   align-items: center;
