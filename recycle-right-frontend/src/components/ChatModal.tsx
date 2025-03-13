@@ -2,7 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import ChatInterface from "./ChatInterface";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -18,7 +19,7 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background-color: white;
+  background-color:#fffef7;
   width: 90%;
   max-width: 450px;
   height: 100%;
@@ -35,7 +36,7 @@ const ModalHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: #00a108;
+  background-color: #B9C9BF;
   color: white;
 `;
 
@@ -60,12 +61,24 @@ const CloseButton = styled.button`
   }
 `;
 
+const BackButton = styled.div`
+  /* background-color: #8390FA; */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+`;
+
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -77,11 +90,25 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose }) => {
     e.stopPropagation();
   };
 
+  const handleBack = () => {
+    onClose();
+  };
+
   return (
     <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent onClick={handleContentClick}>
         <ModalHeader>
-          <Title>Trashtalker</Title>
+          <BackButton onClick={handleBack}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </BackButton>
+          <Title>
+            <img
+              src={require('./logo.png')}
+              alt="logo"
+              style={{ maxWidth: "15%", marginRight:"10px" }}
+            />
+            Trashtalker
+          </Title>
           <CloseButton onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} />
           </CloseButton>

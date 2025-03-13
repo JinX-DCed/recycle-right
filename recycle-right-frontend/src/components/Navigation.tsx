@@ -3,6 +3,8 @@ import { useState } from 'react';
 import BinMapModal from './BinMapModal';
 import ResourcesModal from './ResourcesModal';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBook, faMap, faChartBar } from '@fortawesome/free-solid-svg-icons';
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -14,7 +16,7 @@ const NavButton = styled.button`
   background-color: #FFF8F0; /* Green background */
   color: black; /* White text */
   border: none; /* No border */
-  border-radius: 5px; /* Rounded corners */
+  border-radius: 20px; /* Rounded corners */
   padding: 20px; /* Equal padding for a square shape */
   margin: 5px; /* Margin between buttons */
   margin-bottom: 30px;
@@ -24,6 +26,7 @@ const NavButton = styled.button`
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s; /* Smooth transition for hover effect */
   font-weight: bold;
+  height: 120px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow effect */
 
   &:hover {

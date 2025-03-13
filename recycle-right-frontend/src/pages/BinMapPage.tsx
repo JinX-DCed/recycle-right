@@ -27,7 +27,7 @@ const ContentWrapper = styled.div`
 `;
 
 const Header = styled.div`
-  background-color: #00a108;
+  background-color: #8390FA;
   color: white;
   padding: 16px;
   display: flex;

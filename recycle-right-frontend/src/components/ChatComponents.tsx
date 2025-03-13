@@ -17,7 +17,7 @@ export const MenuContainer = styled.div`
 `;
 
 export const MenuTitle = styled.h2`
-  color: #00a108;
+  color: black;
   text-align: center;
   margin: 0;
 `;
@@ -30,9 +30,9 @@ export const ButtonGrid = styled.div`
 `;
 
 export const MenuButton = styled.button`
-  background-color: #00a108;
-  color: white;
-  border: none;
+  background-color: #fffef7;
+  color: #8390FA;
+  border: solid #8390FA 2px;
   border-radius: 12px;
   padding: 16px;
   font-size: 16px;
@@ -40,10 +40,11 @@ export const MenuButton = styled.button`
   cursor: pointer;
   transition: background-color 0.2s;
   width: 100%;
+  height: 150px;
   text-align: center;
 
   &:hover {
-    background-color: #008c06;
+    background-color: #8390FA;
   }
 `;
 
@@ -109,7 +110,7 @@ export const MessageBubble = styled.div<{ isUser: boolean }>`
   }
 
   & a {
-    color: #00a108;
+    color: #8390FA;
     text-decoration: none;
     &:hover {
       text-decoration: underline;
@@ -138,7 +139,7 @@ export const LocationCard = styled.div`
 `;
 
 export const LocationHeader = styled.div`
-  background-color: #00a108;
+  background-color: #8390FA;
   color: white;
   padding: 10px 16px;
   font-weight: 500;
@@ -152,7 +153,7 @@ export const LocationContent = styled.div`
 `;
 
 export const LocationButton = styled.button`
-  background-color: #00a108;
+  background-color: #8390FA;
   color: white;
   border: none;
   border-radius: 24px;
@@ -167,7 +168,7 @@ export const LocationButton = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #008c06;
+    background-color: #7a8afd;
   }
 `;
 
@@ -189,7 +190,7 @@ export const QuickOption = styled.button`
   border: 1px solid #e0e0e0;
   border-radius: 16px;
   background-color: white;
-  color: #00a108;
+  color: #8390FA;
   font-size: 14px;
   white-space: nowrap;
   cursor: pointer;
@@ -197,7 +198,7 @@ export const QuickOption = styled.button`
 
   &:hover {
     background-color: #f0f8f0;
-    border-color: #00a108;
+    border-color: #6879f8;
   }
 
   & svg {
@@ -221,12 +222,12 @@ export const MessageInput = styled.input`
   font-size: 16px;
 
   &:focus {
-    border-color: #00a108;
+    border-color: #8390FA;
   }
 `;
 
 export const SendButton = styled.button`
-  background: #00a108;
+  background: #8390FA;
   color: white;
   border: none;
   border-radius: 50%;
@@ -247,7 +248,7 @@ export const SendButton = styled.button`
 export const ImageButton = styled.button`
   background: none;
   border: none;
-  color: #00a108;
+  color: #8390FA;
   margin-right: 8px;
   display: flex;
   align-items: center;

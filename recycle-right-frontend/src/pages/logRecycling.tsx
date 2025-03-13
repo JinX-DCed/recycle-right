@@ -28,7 +28,7 @@ const ButtonContainer = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: #00a108;
+  background-color: #8390FA;
   color: white;
   padding: 10px 16px;
   border: none;
@@ -43,7 +43,7 @@ const Button = styled.button`
   width: 100%;
 
   &:hover {
-    background-color: #008a06;
+    background-color: #6c78d3;
     transform: scale(1.02);
   }
 `;
@@ -55,7 +55,6 @@ const DeleteButton = styled(Button)`
   }
 `;
 
-// Define the interface for our item display
 interface Item {
 	id: number;
 	name: string;
@@ -149,9 +148,11 @@ const LogRecycling = () => {
 	const canSubmit = items.length !== 0;
 
 	return (
+		<>
+		<Header />
+
 		<Container>
 			{/* Header */}
-			<Header />
 
 			{/* Items List */}
 			{items.map((item) => (
@@ -231,6 +232,7 @@ const LogRecycling = () => {
 				Submit Log
 			</Button>
 		</Container>
+		</>
 	);
 };
 
