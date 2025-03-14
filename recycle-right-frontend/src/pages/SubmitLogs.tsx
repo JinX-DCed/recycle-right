@@ -100,7 +100,12 @@ const SubmitLogs = () => {
   const nextMilestone = 300;
 
   const tasks = [
-    { text: "Recycle 3 types of items", progress: "1/3", status: "In progress", completed: false },
+    {
+      text: "Recycle 3 types of items",
+      progress: "1/3",
+      status: "In progress",
+      completed: false,
+    },
     { text: "Recycle 1 item", points: 20, completed: true },
     { text: "5-day streak", points: 80, completed: true },
   ];
@@ -118,7 +123,7 @@ const SubmitLogs = () => {
 
   return (
     <>
-      <Header />
+      <Header title="Log recycled item" />
       <Container>
         <Card>
           <h2 className="text-4xl">😊</h2>
@@ -140,17 +145,27 @@ const SubmitLogs = () => {
           <TaskList>
             {tasks.map((task, index) => (
               <TaskItem key={index} completed={task.completed}>
-                <span className={`mr-3 text-lg ${task.completed ? "text-green-500" : "text-gray-400"}`}>
+                <span
+                  className={`mr-3 text-lg ${
+                    task.completed ? "text-green-500" : "text-gray-400"
+                  }`}
+                >
                   {task.completed ? "✔️" : "⚪"}
                 </span>
                 <TaskText completed={task.completed}>{task.text}</TaskText>
-                {task.points && <p className="text-sm font-semibold text-blue-600">{task.points}pts</p>}
+                {task.points && (
+                  <p className="text-sm font-semibold text-blue-600">
+                    {task.points}pts
+                  </p>
+                )}
               </TaskItem>
             ))}
           </TaskList>
 
           {/* Back Button */}
-          <BackButton onClick={() => window.location.href = '/'}>Back to Home</BackButton>
+          <BackButton onClick={() => (window.location.href = "/")}>
+            Back to Home
+          </BackButton>
         </Card>
       </Container>
     </>
