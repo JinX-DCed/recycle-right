@@ -1,6 +1,6 @@
-import styled from 'styled-components';
-import React, { useState } from 'react';
-import Modal from './Modal';
+import styled from "styled-components";
+import React, { useState } from "react";
+import Modal from "./Modal";
 
 const ActivityContainer = styled.div`
   padding: 16px;
@@ -15,8 +15,13 @@ const Title = styled.h2`
   margin-bottom: 16px;
 `;
 
-const Button = styled.button`
-  background-color: #CDD3FD;
+// Accept an "isActive" parameter that will determine the background color of the button
+interface ButtonProps {
+  isActive?: boolean;
+}
+
+const Button = styled.button<ButtonProps>`
+  background-color: ${(props) => (props.isActive ? "#612f7e" : "#CDD3FD")};
   color: white;
   padding: 10px 16px;
   border: none;
@@ -125,26 +130,27 @@ const Records = () => {
 
   const records = [
     {
-      date: '13 Feb 2025, 06:00pm',
+      date: "13 Feb 2025, 06:00pm",
       points: 60,
-      items: ['Jam jar', 'Cardboard box', 'iPhone'],
+      items: ["Jam jar", "Cardboard box", "iPhone"],
     },
     {
-      date: '12 Feb 2025, 05:00pm',
+      date: "12 Feb 2025, 05:00pm",
       points: 60,
-      items: ['Plastic bottle', 'Old newspaper'],
+      items: ["Plastic bottle", "Old newspaper"],
     },
   ];
 
   const historicalRecords = [
-    { date: '10 Feb 2025', points: 30 },
-    { date: '09 Feb 2025', points: 50 },
+    { date: "10 Feb 2025", points: 30 },
+    { date: "09 Feb 2025", points: 50 },
   ];
 
   const handleToggle = (index: number) => {
     const content = document.getElementById(`expandable-${index}`);
     if (content) {
-      content.style.display = content.style.display === 'block' ? 'none' : 'block';
+      content.style.display =
+        content.style.display === "block" ? "none" : "block";
     }
   };
 
@@ -161,15 +167,20 @@ const Records = () => {
           </RecordItem>
           <ExpandableContent id={`expandable-${index}`}>
             {record.items.map((item, itemIndex) => (
-              <div key={itemIndex} style={{ paddingLeft: '20px' }}>
+              <div key={itemIndex} style={{ paddingLeft: "20px" }}>
                 {item}
               </div>
             ))}
           </ExpandableContent>
         </div>
       ))}
-      <div 
-        style={{ textAlign: 'center', marginTop: '12px', color: '#007bff', cursor: 'pointer' }} 
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "12px",
+          color: "#007bff",
+          cursor: "pointer",
+        }}
         onClick={() => setIsModalOpen(true)}
       >
         See all records
@@ -190,22 +201,33 @@ const Records = () => {
 };
 
 const Activity = () => {
-  const [activeComponent, setActiveComponent] = useState<'challenges' | 'records'>('challenges');
+  const [activeComponent, setActiveComponent] = useState<
+    "challenges" | "records"
+  >("challenges");
 
   return (
     <ActivityContainer>
       <Title>Your Activity</Title>
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-        <Button onClick={() => setActiveComponent('challenges')}>Challenges</Button>
-        <Button onClick={() => setActiveComponent('records')}>Records</Button>
+      <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+        <Button
+          onClick={() => setActiveComponent("challenges")}
+          isActive={activeComponent === "challenges"}
+        >
+          Challenges
+        </Button>
+        <Button
+          onClick={() => setActiveComponent("records")}
+          isActive={activeComponent === "records"}
+        >
+          Records
+        </Button>
       </div>
       <List>
-        {activeComponent === 'challenges' && <Challenges />}
-        {activeComponent === 'records' && <Records />}
+        {activeComponent === "challenges" && <Challenges />}
+        {activeComponent === "records" && <Records />}
       </List>
     </ActivityContainer>
   );
 };
 
 export default Activity;
-  
